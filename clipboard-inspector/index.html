@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clipboard Inspector</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+
+      .container {
+        background: #f5f5f5;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .input-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin: 2rem 0;
+        padding: 1rem;
+        background: #fff;
+        border-radius: 8px;
+      }
+
+      .input-method {
+        padding: 1rem;
+        background: #f9f9f9;
+        border-radius: 6px;
+        border: 1px solid #eee;
+      }
+
+      .input-method h2 {
+        margin: 0 0 1rem 0;
+        font-size: 1.2rem;
+        color: #333;
+      }
+
+      .method-description {
+        margin-bottom: 1rem;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      button:hover {
+        background: #45a049;
+      }
+
+      .paste-area {
+        width: 100%;
+        min-height: 60px;
+        margin: 1rem 0;
+        padding: 1rem;
+        border: 2px dashed #666;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #666;
+      }
+
+      .paste-area:hover {
+        border-color: #4caf50;
+        color: #4caf50;
+      }
+
+      .output-section {
+        margin-top: 2rem;
+      }
+
+      .output-box {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 4px;
+        word-wrap: break-word;
+      }
+
+      .format-section {
+        margin: 1.5rem 0;
+        display: none; /* Hidden by default */
+      }
+
+      .format-label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .format-label::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #4caf50;
+        border-radius: 50%;
+      }
+
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .image-container {
+        position: relative;
+      }
+
+      .image-preview {
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0.5rem;
+      }
+
+      .image-meta {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .meta-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .meta-table td {
+        padding: 0.25rem;
+        border-bottom: 1px solid #eee;
+      }
+
+      .meta-table td:first-child {
+        font-weight: bold;
+        width: 140px;
+      }
+
+      kbd {
+        background: #eee;
+        border-radius: 3px;
+        border: 1px solid #b4b4b4;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        color: #333;
+        display: inline-block;
+        font-size: 0.85em;
+        padding: 2px 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Clipboard Inspector</h1>
+
+      <div class="input-methods">
+        <div class="input-method">
+          <h2>Method 1: Direct Paste</h2>
+          <div class="method-description">
+            Handles direct paste events, including files from your file browser.
+            Press <kbd>Ctrl</kbd>+<kbd>V</kbd> (or <kbd>⌘</kbd>+<kbd>V</kbd> on
+            Mac) in the area below:
+          </div>
+          <div class="paste-area" id="pasteArea" tabindex="0">
+            Click here and paste content to inspect
+          </div>
+        </div>
+
+        <div class="input-method">
+          <h2>Method 2: Clipboard API</h2>
+          <div class="method-description">
+            Uses the browser's Clipboard API to access additional format
+            information. Better for web content but may not see local files.
+            Requires clipboard permission:
+          </div>
+          <button onclick="inspectClipboard()">
+            Inspect Using Clipboard API
+          </button>
+        </div>
+      </div>
+
+      <div class="output-section">
+        <!-- Text format -->
+        <div id="textSection" class="format-section">
+          <div class="format-label">Plain Text</div>
+          <div id="textOutput" class="output-box"></div>
+        </div>
+
+        <!-- HTML format -->
+        <div id="htmlSection" class="format-section">
+          <div class="format-label">HTML</div>
+          <div id="htmlOutput" class="output-box"></div>
+        </div>
+
+        <!-- Rich Text format -->
+        <div id="rtfSection" class="format-section">
+          <div class="format-label">Rich Text Format</div>
+          <div id="rtfOutput" class="output-box"></div>
+        </div>
+
+        <!-- URL format -->
+        <div id="urlSection" class="format-section">
+          <div class="format-label">URL</div>
+          <div id="urlOutput" class="output-box"></div>
+        </div>
+
+        <!-- Images -->
+        <div id="imageSection" class="format-section">
+          <div class="format-label">Images</div>
+          <div id="imageGrid" class="image-grid"></div>
+        </div>
+
+        <!-- Files -->
+        <div id="fileSection" class="format-section">
+          <div class="format-label">Files</div>
+          <div id="fileOutput" class="output-box"></div>
+        </div>
+
+        <!-- Available formats -->
+        <div id="formatsSection" class="format-section">
+          <div class="format-label">Available Formats</div>
+          <div id="formatsOutput" class="output-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const pasteArea = document.getElementById("pasteArea");
+
+      function clearAllSections() {
+        document.querySelectorAll(".format-section").forEach((section) => {
+          section.style.display = "none";
+        });
+        document.getElementById("imageGrid").innerHTML = "";
+      }
+
+      // Consolidated handler for processing different types of content
+      async function processClipboardContent(item, type, getContent) {
+        try {
+          // Text handlers
+          if (type === "text/plain") {
+            const text = await getContent();
+            document.getElementById("textOutput").textContent = text;
+            document.getElementById("textSection").style.display = "block";
+          }
+
+          if (type === "text/html") {
+            const html = await getContent();
+            document.getElementById("htmlOutput").textContent = html;
+            document.getElementById("htmlSection").style.display = "block";
+          }
+
+          if (type === "text/rtf") {
+            const rtf = await getContent();
+            document.getElementById("rtfOutput").textContent = rtf;
+            document.getElementById("rtfSection").style.display = "block";
+          }
+
+          if (type === "text/uri-list") {
+            const url = await getContent();
+            document.getElementById("urlOutput").innerHTML =
+              `<a href="${url}" target="_blank">${url}</a>`;
+            document.getElementById("urlSection").style.display = "block";
+          }
+
+          // Image handler
+          if (type.startsWith("image/")) {
+            const blob = await getContent();
+            const imageContainer = document.createElement("div");
+            imageContainer.className = "image-container";
+
+            const img = document.createElement("img");
+            img.className = "image-preview";
+            img.src = URL.createObjectURL(blob);
+
+            const meta = document.createElement("div");
+            meta.className = "image-meta";
+
+            const table = document.createElement("table");
+            table.className = "meta-table";
+            table.innerHTML = `
+                        <tr><td>Type:</td><td>${type}</td></tr>
+                        <tr><td>Size:</td><td>${formatFileSize(blob.size)}</td></tr>
+                        ${blob.lastModified ? `<tr><td>Last Modified:</td><td>${new Date(blob.lastModified).toLocaleString()}</td></tr>` : ""}
+                    `;
+
+            meta.appendChild(table);
+            imageContainer.appendChild(img);
+            imageContainer.appendChild(meta);
+            document.getElementById("imageGrid").appendChild(imageContainer);
+            document.getElementById("imageSection").style.display = "block";
+          }
+
+          // File handler (non-image files)
+          if (item.kind === "file" && !type.startsWith("image/")) {
+            const file = await getContent();
+            const fileInfo = `
+                        <table class="meta-table">
+                            <tr><td>Name:</td><td>${file.name || "Unknown"}</td></tr>
+                            <tr><td>Type:</td><td>${file.type || "unknown"}</td></tr>
+                            <tr><td>Size:</td><td>${formatFileSize(file.size)}</td></tr>
+                            ${file.lastModified ? `<tr><td>Last Modified:</td><td>${new Date(file.lastModified).toLocaleString()}</td></tr>` : ""}
+                        </table>
+                    `;
+            document.getElementById("fileOutput").innerHTML = fileInfo;
+            document.getElementById("fileSection").style.display = "block";
+          }
+        } catch (err) {
+          console.error(`Error processing ${type}:`, err);
+        }
+      }
+
+      // Handle paste events in the paste area
+      pasteArea.addEventListener("paste", async (e) => {
+        e.preventDefault();
+        clearAllSections();
+
+        try {
+          const clipboardItems = e.clipboardData.items;
+          const formats = new Set();
+
+          for (const item of clipboardItems) {
+            formats.add(item.type);
+            await processClipboardContent(
+              item,
+              item.type,
+              () =>
+                new Promise((resolve) => {
+                  if (item.kind === "file") {
+                    resolve(item.getAsFile());
+                  } else {
+                    item.getAsString(resolve);
+                  }
+                }),
+            );
+          }
+
+          if (formats.size > 0) {
+            document.getElementById("formatsOutput").textContent =
+              `Available types: ${Array.from(formats).join(", ")}`;
+            document.getElementById("formatsSection").style.display = "block";
+          }
+        } catch (err) {
+          console.error("Error processing clipboard:", err);
+          alert("Error processing clipboard contents.");
+        }
+      });
+
+      // Handle clipboard API inspection
+      async function inspectClipboard() {
+        clearAllSections();
+
+        try {
+          const clipboardItems = await navigator.clipboard.read();
+          const formats = new Set();
+
+          for (const item of clipboardItems) {
+            item.types.forEach((type) => formats.add(type));
+
+            for (const type of item.types) {
+              await processClipboardContent(item, type, async () => {
+                const blob = await item.getType(type);
+                if (type.startsWith("text/")) {
+                  return await blob.text();
+                }
+                return blob;
+              });
+            }
+          }
+
+          if (formats.size > 0) {
+            document.getElementById("formatsOutput").textContent =
+              `Available types: ${Array.from(formats).join(", ")}`;
+            document.getElementById("formatsSection").style.display = "block";
+          }
+        } catch (err) {
+          console.error("Error reading clipboard:", err);
+          alert(
+            "Error reading clipboard. Make sure you've granted clipboard permissions.",
+          );
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      pasteArea.addEventListener("click", () => pasteArea.focus());
+    </script>
+  </body>
+</html>
