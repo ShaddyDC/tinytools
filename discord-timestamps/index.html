@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discord Timestamp Generator</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+        background: #f9f9f9;
+      }
+      .container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #5865f2;
+        margin-top: 0;
+      }
+      .input-group {
+        margin-bottom: 2rem;
+      }
+      input[type="datetime-local"] {
+        padding: 0.5rem;
+        font-size: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+        max-width: 300px;
+      }
+      .formats {
+        display: grid;
+        gap: 1rem;
+      }
+      .format-card {
+        border: 1px solid #ddd;
+        padding: 1rem;
+        border-radius: 4px;
+        background: #f8f9fa;
+        display: grid;
+        grid-template-columns: 150px 1fr 1fr auto;
+        gap: 1rem;
+        align-items: center;
+      }
+      .format-title {
+        font-weight: bold;
+        color: #5865f2;
+      }
+      .format-preview {
+        color: #2e3338;
+      }
+      .format-code {
+        font-family: monospace;
+        background: #eee;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.9rem;
+      }
+      button {
+        background: #5865f2;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+      button:hover {
+        background: #4752c4;
+      }
+      .copied {
+        background: #43b581;
+      }
+      @media (max-width: 700px) {
+        .format-card {
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Discord Timestamp Generator</h1>
+
+      <div class="input-group">
+        <label for="datetime">Select Date and Time:</label><br />
+        <input type="datetime-local" id="datetime" />
+      </div>
+
+      <div class="formats"></div>
+    </div>
+
+    <script>
+      const formats = [
+        {
+          name: "Default",
+          suffix: "",
+          formatter: (date) => date.toLocaleString(),
+        },
+        {
+          name: "Short Time",
+          suffix: "t",
+          formatter: (date) =>
+            date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        },
+        {
+          name: "Long Time",
+          suffix: "T",
+          formatter: (date) =>
+            date.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+            }),
+        },
+        {
+          name: "Short Date",
+          suffix: "d",
+          formatter: (date) => date.toLocaleDateString(),
+        },
+        {
+          name: "Long Date",
+          suffix: "D",
+          formatter: (date) =>
+            date.toLocaleDateString([], {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+        },
+        {
+          name: "Short Date/Time",
+          suffix: "f",
+          formatter: (date) =>
+            date.toLocaleString([], {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+        },
+        {
+          name: "Long Date/Time",
+          suffix: "F",
+          formatter: (date) =>
+            date.toLocaleString([], {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+        },
+        {
+          name: "Relative Time",
+          suffix: "R",
+          formatter: (date) => {
+            const diff = date - new Date();
+            const seconds = Math.floor(Math.abs(diff) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            const months = Math.floor(days / 30);
+            const years = Math.floor(days / 365);
+
+            if (diff > 0) {
+              if (seconds < 60) return "in a few seconds";
+              if (minutes < 60)
+                return `in ${minutes} minute${minutes !== 1 ? "s" : ""}`;
+              if (hours < 24)
+                return `in ${hours} hour${hours !== 1 ? "s" : ""}`;
+              if (days < 30) return `in ${days} day${days !== 1 ? "s" : ""}`;
+              if (months < 12)
+                return `in ${months} month${months !== 1 ? "s" : ""}`;
+              return `in ${years} year${years !== 1 ? "s" : ""}`;
+            } else {
+              if (seconds < 60) return "a few seconds ago";
+              if (minutes < 60)
+                return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+              if (hours < 24)
+                return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+              if (days < 30) return `${days} day${days !== 1 ? "s" : ""} ago`;
+              if (months < 12)
+                return `${months} month${months !== 1 ? "s" : ""} ago`;
+              return `${years} year${years !== 1 ? "s" : ""} ago`;
+            }
+          },
+        },
+      ];
+
+      const formatsContainer = document.querySelector(".formats");
+      const datetimeInput = document.getElementById("datetime");
+
+      // Set input to current date/time
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      datetimeInput.value = now.toISOString().slice(0, 16);
+
+      function createFormatCard(format) {
+        const card = document.createElement("div");
+        card.className = "format-card";
+
+        const title = document.createElement("div");
+        title.className = "format-title";
+        title.textContent = format.name;
+
+        const preview = document.createElement("div");
+        preview.className = "format-preview";
+
+        const code = document.createElement("div");
+        code.className = "format-code";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "Copy";
+
+        card.appendChild(title);
+        card.appendChild(preview);
+        card.appendChild(code);
+        card.appendChild(copyBtn);
+
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(code.textContent);
+          copyBtn.textContent = "Copied!";
+          copyBtn.classList.add("copied");
+          setTimeout(() => {
+            copyBtn.textContent = "Copy";
+            copyBtn.classList.remove("copied");
+          }, 2000);
+        });
+
+        return { card, preview, code };
+      }
+
+      // Create format cards
+      const cards = formats.map((format) => {
+        const { card, preview, code } = createFormatCard(format);
+        formatsContainer.appendChild(card);
+        return { format, preview, code };
+      });
+
+      // Update timestamps when input changes
+      function updateTimestamps() {
+        const selectedDate = new Date(datetimeInput.value);
+        const timestamp = Math.floor(selectedDate.getTime() / 1000);
+
+        cards.forEach(({ format, preview, code }) => {
+          const formatString = format.suffix
+            ? `<t:${timestamp}:${format.suffix}>`
+            : `<t:${timestamp}>`;
+          code.textContent = formatString;
+          preview.textContent = format.formatter(selectedDate);
+        });
+      }
+
+      datetimeInput.addEventListener("change", updateTimestamps);
+
+      // Update relative timestamps every second
+      setInterval(updateTimestamps, 1000);
+
+      updateTimestamps();
+    </script>
+  </body>
+</html>
