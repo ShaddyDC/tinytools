@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Claude Cost Calculator</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .calculator {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+      select,
+      input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 10px;
+      }
+      .results {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+      }
+      .results div {
+        margin-bottom: 8px;
+      }
+      .checkbox-group {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkbox-group input[type="checkbox"] {
+        margin: 0;
+      }
+      .checkbox-group label {
+        margin: 0;
+        display: inline;
+      }
+      .total {
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="calculator">
+      <h1>Claude Cost Calculator</h1>
+
+      <div class="form-group">
+        <label for="model">Select Model:</label>
+        <select id="model">
+          <option value="sonnet">Claude 3.5 Sonnet</option>
+          <option value="haiku">Claude 3.5 Haiku</option>
+          <option value="opus">Claude 3 Opus</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="inputTokens">Input Tokens:</label>
+        <input type="text" id="inputTokens" value="0" inputmode="numeric" />
+      </div>
+
+      <div class="form-group">
+        <label for="outputTokens">Output Tokens:</label>
+        <input type="text" id="outputTokens" value="0" inputmode="numeric" />
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="useBatchApi" />
+        <label for="useBatchApi">Use Batch API (50% discount)</label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="usePromptCaching" />
+        <label for="usePromptCaching">Use Prompt Caching</label>
+      </div>
+
+      <div class="results" id="results">
+        <div id="inputCost"></div>
+        <div id="outputCost"></div>
+        <div id="cachingCost"></div>
+        <div class="total" id="totalCost"></div>
+      </div>
+    </div>
+
+    <script>
+      const prices = {
+        sonnet: {
+          input: 3,
+          output: 15,
+          cachingWrite: 3.75,
+          cachingRead: 0.3,
+        },
+        haiku: {
+          input: 0.25,
+          output: 1.25,
+          cachingWrite: 0.3,
+          cachingRead: 0.03,
+        },
+        opus: {
+          input: 15,
+          output: 75,
+          cachingWrite: 18.75,
+          cachingRead: 1.5,
+        },
+      };
+
+      function parseNumber(value) {
+        // Remove all commas and convert to string
+        const cleanValue = value.toString().replace(/,/g, "");
+        // Parse as float, returning 0 if invalid
+        return parseFloat(cleanValue) || 0;
+      }
+
+      function calculateCost() {
+        const model = document.getElementById("model").value;
+        const inputTokens = parseNumber(
+          document.getElementById("inputTokens").value,
+        );
+        const outputTokens = parseNumber(
+          document.getElementById("outputTokens").value,
+        );
+        const useBatchApi = document.getElementById("useBatchApi").checked;
+        const usePromptCaching =
+          document.getElementById("usePromptCaching").checked;
+
+        let multiplier = useBatchApi ? 0.5 : 1;
+        let modelPrices = prices[model];
+
+        // Convert to millions of tokens
+        const inputTokensM = inputTokens / 1000000;
+        const outputTokensM = outputTokens / 1000000;
+
+        let inputCost = inputTokensM * modelPrices.input * multiplier;
+        let outputCost = outputTokensM * modelPrices.output * multiplier;
+        let cachingCost = 0;
+
+        if (usePromptCaching) {
+          cachingCost =
+            inputTokensM * modelPrices.cachingWrite * multiplier +
+            inputTokensM * modelPrices.cachingRead * multiplier;
+        }
+
+        const total = inputCost + outputCost + cachingCost;
+
+        // Display results
+        document.getElementById("inputCost").textContent =
+          `Input Cost: $${inputCost.toFixed(4)}`;
+        document.getElementById("outputCost").textContent =
+          `Output Cost: $${outputCost.toFixed(4)}`;
+        document.getElementById("cachingCost").textContent = usePromptCaching
+          ? `Caching Cost: $${cachingCost.toFixed(4)}`
+          : "";
+        document.getElementById("totalCost").textContent =
+          `Total Cost: $${total.toFixed(4)}`;
+      }
+
+      // Add event listeners for live updates
+      const inputs = [
+        "model",
+        "inputTokens",
+        "outputTokens",
+        "useBatchApi",
+        "usePromptCaching",
+      ];
+      inputs.forEach((id) => {
+        document.getElementById(id).addEventListener("input", calculateCost);
+      });
+
+      // Initial calculation
+      calculateCost();
+    </script>
+  </body>
+</html>
