@@ -2,6 +2,7 @@ name: Build and Deploy
 on:
   push:
     branches: [main]
+  pull_request:
 # Sets permissions of the GITHUB_TOKEN
 permissions:
   contents: read
@@ -25,6 +26,7 @@ jobs:
         with:
           path: '.'
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     environment:
       name: github-pages
