@@ -18,5 +18,10 @@
     "title": "LLM token price calculator",
     "description": "Calculate the price of LLM uses based on input and output tokens",
     "id": "token-count"
+  },
+  {
+    "title": "Twitch prediction calculator",
+    "description": "Calculate the expected value of channel point wagers",
+    "id": "twi-calc-bet"
   }
 ]
