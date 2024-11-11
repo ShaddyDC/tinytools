@@ -162,59 +162,44 @@
     <div class="content" id="content"></div>
 
     <script>
-      // Your projects list
-      const projects = [
-        {
-          title: "URL Decoder",
-          description: "Allows decoding URLs",
-          path: "./url-decoder",
-          id: "url-decoder",
-        },
-        {
-          title: "Discord Timestamps",
-          description: "Create Discord timestamps",
-          path: "./discord-timestamps",
-          id: "discord-timestamps",
-        },
-        {
-          title: "Clipboard Inspector",
-          description: "Inspect the browser-available clipboard items",
-          path: "./clipboard-inspector",
-          id: "clipboard-inspector",
-        },
-        {
-          title: "LLM token price calculator",
-          description:
-            "Calculate the price of LLM uses based on input and output tokens",
-          path: "./token-count",
-          id: "token-count",
-        },
-      ];
+      let projects = [];
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("./projects.json");
+          projects = await response.json();
+          initializeApp();
+        } catch (error) {
+          console.error("Error loading projects:", error);
+          document.getElementById("content").innerHTML =
+            '<div style="text-align: center; padding: 2em;">Error loading projects. Please try again later.</div>';
+        }
+      }
 
       function createOverview() {
         return `
-                <div class="project-grid">
-                    ${projects
-                      .map(
-                        (project) => `
-                        <div class="project-card" onclick="loadTool('${project.id}')">
-                            <h2 class="project-title">${project.title}</h2>
-                            <p class="project-description">${project.description}</p>
-                        </div>
-                    `,
-                      )
-                      .join("")}
-                </div>
-            `;
+          <div class="project-grid">
+            ${projects
+              .map(
+                (project) => `
+                  <div class="project-card" onclick="loadTool('${project.id}')">
+                    <h2 class="project-title">${project.title}</h2>
+                    <p class="project-description">${project.description}</p>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        `;
       }
 
       function createToolView(toolId) {
         const tool = projects.find((p) => p.id === toolId);
         return `
-                <div class="iframe-container">
-                    <iframe src="${tool.path}" title="${tool.title}"></iframe>
-                </div>
-            `;
+          <div class="iframe-container">
+            <iframe src="./${tool.id}" title="${tool.title}"></iframe>
+          </div>
+        `;
       }
 
       function showOverview() {
@@ -241,25 +226,30 @@
         history.pushState({}, "", newUrl);
       }
 
-      // Handle browser back/forward
-      window.addEventListener("popstate", () => {
+      function initializeApp() {
+        // Handle browser back/forward
+        window.addEventListener("popstate", () => {
+          const params = new URLSearchParams(window.location.search);
+          const toolId = params.get("tool");
+          if (toolId) {
+            loadTool(toolId);
+          } else {
+            showOverview();
+          }
+        });
+
+        // Load initial view
         const params = new URLSearchParams(window.location.search);
-        const toolId = params.get("tool");
-        if (toolId) {
-          loadTool(toolId);
+        const initialTool = params.get("tool");
+        if (initialTool) {
+          loadTool(initialTool);
         } else {
           showOverview();
         }
-      });
-
-      // Load initial view
-      const params = new URLSearchParams(window.location.search);
-      const initialTool = params.get("tool");
-      if (initialTool) {
-        loadTool(initialTool);
-      } else {
-        showOverview();
       }
+
+      // Start loading projects when the script runs
+      loadProjects();
     </script>
   </body>
 </html>

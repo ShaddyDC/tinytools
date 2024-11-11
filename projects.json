@@ -1,0 +1,22 @@
+[
+  {
+    "title": "URL Decoder",
+    "description": "Allows decoding URLs",
+    "id": "url-decoder"
+  },
+  {
+    "title": "Discord Timestamps",
+    "description": "Create Discord timestamps",
+    "id": "discord-timestamps"
+  },
+  {
+    "title": "Clipboard Inspector",
+    "description": "Inspect the browser-available clipboard items",
+    "id": "clipboard-inspector"
+  },
+  {
+    "title": "LLM token price calculator",
+    "description": "Calculate the price of LLM uses based on input and output tokens",
+    "id": "token-count"
+  }
+]
