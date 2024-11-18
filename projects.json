@@ -23,5 +23,10 @@
     "title": "Twitch prediction calculator",
     "description": "Calculate the expected value of channel point wagers",
     "id": "twi-calc-bet"
+  },
+  {
+    "title": "DB Ticket Price Calculator",
+    "description": "Calculate the price effectiveness of different German DB Bahncards",
+    "id": "db-price-calculator"
   }
 ]

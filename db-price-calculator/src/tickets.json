@@ -1,0 +1,400 @@
+{
+  "timestamp": "2024-11-18T17:04:41.862150Z",
+  "tickets": {
+    "U18": [
+      {
+        "title": "My BahnCard 25, 2. Klasse",
+        "price": 39.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 25, 1. Klasse",
+        "price": 81.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "Jugend BahnCard 25",
+        "price": 7.9,
+        "class": null,
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 50, 2. Klasse",
+        "price": 79.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 50, 1. Klasse",
+        "price": 241.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 100, 2. Klasse",
+        "price": 2988.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 100, 1. Klasse",
+        "price": 5888.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": false
+      },
+      {
+        "title": "Probe BahnCard 25, 2. Klasse",
+        "price": 19.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 25, 1. Klasse",
+        "price": 39.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 2. Klasse",
+        "price": 76.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 1. Klasse",
+        "price": 152.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 2. Klasse",
+        "price": 1359.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 1. Klasse",
+        "price": 2449.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": true
+      }
+    ],
+    "U26": [
+      {
+        "title": "My BahnCard 25, 2. Klasse",
+        "price": 39.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 25, 1. Klasse",
+        "price": 81.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 50, 2. Klasse",
+        "price": 79.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 50, 1. Klasse",
+        "price": 241.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 100, 2. Klasse",
+        "price": 2988.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": false
+      },
+      {
+        "title": "My BahnCard 100, 1. Klasse",
+        "price": 5888.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": false
+      },
+      {
+        "title": "Probe BahnCard 25, 2. Klasse",
+        "price": 19.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 25, 1. Klasse",
+        "price": 39.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 2. Klasse",
+        "price": 76.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 1. Klasse",
+        "price": 152.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 2. Klasse",
+        "price": 1359.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 1. Klasse",
+        "price": 2449.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": true
+      }
+    ],
+    "U64": [
+      {
+        "title": "BahnCard 25, 2. Klasse",
+        "price": 62.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "BahnCard 25, 1. Klasse",
+        "price": 125.0,
+        "class": "1",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "BahnCard 50, 2. Klasse",
+        "price": 244.0,
+        "class": "2",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "BahnCard 50, 1. Klasse",
+        "price": 492.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "BahnCard 100, 2. Klasse",
+        "price": 4550.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": false
+      },
+      {
+        "title": "BahnCard 100, 1. Klasse",
+        "price": 7714.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": false
+      },
+      {
+        "title": "Probe BahnCard 25, 2. Klasse",
+        "price": 19.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 25, 1. Klasse",
+        "price": 39.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 2. Klasse",
+        "price": 76.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 1. Klasse",
+        "price": 152.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 2. Klasse",
+        "price": 1359.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 1. Klasse",
+        "price": 2449.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": true
+      }
+    ],
+    "Senior": [
+      {
+        "title": "Senioren BahnCard 25, 2. Klasse",
+        "price": 40.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "Senioren BahnCard 25, 1. Klasse",
+        "price": 81.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "Senioren BahnCard 50, 2. Klasse",
+        "price": 122.0,
+        "class": "2",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "Senioren BahnCard 50, 1. Klasse",
+        "price": 241.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "Probe BahnCard 25, 2. Klasse",
+        "price": 19.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 25, 1. Klasse",
+        "price": 39.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 2. Klasse",
+        "price": 76.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 50, 1. Klasse",
+        "price": 152.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 2. Klasse",
+        "price": 1359.0,
+        "class": "2",
+        "type": "100",
+        "isProbe": true
+      },
+      {
+        "title": "Probe BahnCard 100, 1. Klasse",
+        "price": 2449.0,
+        "class": "1",
+        "type": "100",
+        "isProbe": true
+      }
+    ],
+    "Ermaessigt": [
+      {
+        "title": "Ermäßigte BahnCard 25, 2. Klasse",
+        "price": 40.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "Ermäßigte BahnCard 25, 1. Klasse",
+        "price": 81.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": false
+      },
+      {
+        "title": "Ermäßigte Probe BahnCard 25, 2. Klasse",
+        "price": 19.9,
+        "class": "2",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Ermäßigte Probe BahnCard 25, 1. Klasse",
+        "price": 39.9,
+        "class": "1",
+        "type": "25",
+        "isProbe": true
+      },
+      {
+        "title": "Ermäßigte BahnCard 50, 1. Klasse",
+        "price": 241.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "Ermäßigte BahnCard 50, 2. Klasse",
+        "price": 122.0,
+        "class": "2",
+        "type": "50",
+        "isProbe": false
+      },
+      {
+        "title": "Ermäßigte Probe BahnCard 50, 2. Klasse",
+        "price": 76.9,
+        "class": "2",
+        "type": "50",
+        "isProbe": true
+      },
+      {
+        "title": "Ermäßigte Probe BahnCard 50, 1. Klasse",
+        "price": 152.0,
+        "class": "1",
+        "type": "50",
+        "isProbe": true
+      }
+    ]
+  }
+}
