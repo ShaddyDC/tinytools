@@ -61,10 +61,64 @@
         margin-top: 1rem;
         background-color: #f9f9f9;
       }
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .info-icon {
+        cursor: help;
+        color: #666;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .tooltip {
+        visibility: hidden;
+        position: absolute;
+        left: 30px;
+        top: 0;
+        padding: 1rem;
+        background: #333;
+        color: white;
+        font-size: 0.875rem;
+        border-radius: 4px;
+        width: 300px;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .info-icon:hover .tooltip {
+        visibility: visible;
+      }
     </style>
   </head>
   <body>
-    <h1>Recipe Converter</h1>
+    <div class="header">
+      <h1>Recipe Converter</h1>
+      <div class="info-icon">
+        ⓘ
+        <div class="tooltip">
+          <p>
+            This converter automatically adjusts ingredient quantities in your
+            recipe based on desired servings.
+          </p>
+          <p>It recognizes and converts:</p>
+          • Whole numbers (e.g., "2")<br />
+          • Decimals (e.g., "2.5")<br />
+          • Fractions (e.g., "1/2")<br />
+          • Mixed numbers (e.g., "2 1/2")<br />
+          <p>
+            All numbers are converted to decimals with up to 2 decimal places
+            for consistency.
+          </p>
+        </div>
+      </div>
+    </div>
 
     <div class="input-group">
       <label for="recipe">Paste your recipe here:</label>
