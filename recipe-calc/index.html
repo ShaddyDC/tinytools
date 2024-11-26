@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Recipe Converter</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+
+      .input-group {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 200px;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      input[type="number"] {
+        width: 100px;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      #output {
+        white-space: pre-wrap;
+        padding: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-top: 1rem;
+        background-color: #f9f9f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Recipe Converter</h1>
+
+    <div class="input-group">
+      <label for="recipe">Paste your recipe here:</label>
+      <textarea
+        id="recipe"
+        placeholder="Paste your recipe text here..."
+      ></textarea>
+    </div>
+
+    <div class="input-group">
+      <label for="originalServings">Original number of servings:</label>
+      <input type="number" id="originalServings" min="1" value="4" />
+    </div>
+
+    <div class="input-group">
+      <label for="desiredServings">Desired number of servings:</label>
+      <input type="number" id="desiredServings" min="1" value="6" />
+    </div>
+
+    <button onclick="convertRecipe()">Convert Recipe</button>
+
+    <div id="output"></div>
+
+    <script>
+      function convertToDecimal(numberStr) {
+        // If it's a mixed number (e.g., "2 1/2")
+        if (numberStr.includes(" ") && numberStr.includes("/")) {
+          const [whole, fraction] = numberStr.split(" ");
+          const [numerator, denominator] = fraction.split("/");
+          return parseInt(whole) + parseInt(numerator) / parseInt(denominator);
+        }
+        // If it's a fraction
+        if (numberStr.includes("/")) {
+          const [numerator, denominator] = numberStr.split("/");
+          return parseInt(numerator) / parseInt(denominator);
+        }
+        // If it's already a decimal or whole number
+        return parseFloat(numberStr);
+      }
+
+      function formatNumber(number) {
+        // Round to 2 decimal places
+        return Math.round(number * 100) / 100;
+      }
+
+      function convertRecipe() {
+        const recipe = document.getElementById("recipe").value;
+        const originalServings = parseFloat(
+          document.getElementById("originalServings").value,
+        );
+        const desiredServings = parseFloat(
+          document.getElementById("desiredServings").value,
+        );
+
+        if (!recipe || !originalServings || !desiredServings) {
+          alert("Please fill in all fields");
+          return;
+        }
+
+        const ratio = desiredServings / originalServings;
+
+        // Match whole numbers, decimals, fractions, and mixed numbers
+        const numberPattern =
+          /(?<=^|\s)((\d+\s+\d+\/\d+)|(\d+\/\d+)|(\d+\.?\d*))(?=\s|$|[^\d\/\.])/g;
+
+        const convertedRecipe = recipe.replace(numberPattern, (match) => {
+          const decimal = convertToDecimal(match);
+          return formatNumber(decimal * ratio);
+        });
+
+        document.getElementById("output").textContent = convertedRecipe;
+      }
+    </script>
+  </body>
+</html>

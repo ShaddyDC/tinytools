@@ -28,5 +28,10 @@
     "title": "DB Ticket Price Calculator",
     "description": "Calculate the price effectiveness of different German DB Bahncards",
     "id": "db-price-calculator"
+  },
+  {
+    "title": "Recipe calculator",
+    "description": "Calculate the ingredient amounts for different recipe serving numbers",
+    "id": "recipe-calc"
   }
 ]
