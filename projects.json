@@ -5,6 +5,11 @@
     "id": "url-decoder"
   },
   {
+    "title": "Timestamp Converter",
+    "description": "Allows working with eg unix timestamps",
+    "id": "timestamp-converter"
+  },
+  {
     "title": "Discord Timestamps",
     "description": "Create Discord timestamps",
     "id": "discord-timestamps"

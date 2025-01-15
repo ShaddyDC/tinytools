@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: monospace;
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: #f3f3f3;
+      }
+      .box {
+        background: #fff;
+        padding: 1rem;
+        margin: 1rem 0;
+        border: 1px solid #ddd;
+        cursor: pointer;
+      }
+      input {
+        width: 100%;
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        font-family: monospace;
+      }
+      .smol {
+        font-size: 0.8em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="smol">
+      unix milliseconds timestamp converter (integer ms since 1970-01-01
+      00:00:00 UTC)
+    </div>
+    <div>
+      <input type="datetime-local" id="datetime" step="0.001" />
+      <div class="box" id="ts-output">pick a time</div>
+    </div>
+
+    <div style="margin-top: 2rem">
+      <input type="text" id="ts-input" placeholder="paste timestamp here" />
+      <div class="box" id="date-output">paste timestamp above</div>
+    </div>
+
+    <script>
+      const dt = document.getElementById("datetime");
+      const tsOut = document.getElementById("ts-output");
+      const tsIn = document.getElementById("ts-input");
+      const dateOut = document.getElementById("date-output");
+
+      dt.addEventListener("input", () => {
+        const timestamp = new Date(dt.value).getTime();
+        tsOut.textContent = timestamp;
+      });
+
+      tsIn.addEventListener("input", () => {
+        try {
+          const date = new Date(parseInt(tsIn.value));
+          if (isNaN(date)) throw new Error("invalid");
+          dateOut.textContent = date.toISOString();
+        } catch (e) {
+          dateOut.textContent = "not a valid timestamp fam";
+        }
+      });
+
+      function copy(el) {
+        navigator.clipboard.writeText(el.textContent);
+        el.textContent += " (copied!)";
+        setTimeout(() => {
+          el.textContent = el.textContent.replace(" (copied!)", "");
+        }, 1000);
+      }
+
+      tsOut.onclick = () => copy(tsOut);
+      dateOut.onclick = () => copy(dateOut);
+
+      // init with current time
+      dt.value = new Date().toISOString().slice(0, -5);
+      dt.dispatchEvent(new Event("input"));
+    </script>
+  </body>
+</html>
