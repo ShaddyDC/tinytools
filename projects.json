@@ -38,5 +38,10 @@
     "title": "Recipe calculator",
     "description": "Calculate the ingredient amounts for different recipe serving numbers",
     "id": "recipe-calc"
+  },
+  {
+    "title": "Card counting game",
+    "description": "Practice your memorisation skills for card games to know what's still in the game",
+    "id": "card-count"
   }
 ]

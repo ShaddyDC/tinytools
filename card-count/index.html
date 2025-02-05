@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .card {
+        padding: 1rem;
+        text-align: center;
+        font-size: 1.5rem;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+      }
+      .hidden {
+        background: #f3f4f6;
+      }
+      .recall {
+        background: #f3e8ff;
+      }
+      button {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        cursor: pointer;
+      }
+      .next {
+        background: #3b82f6;
+      }
+      .show {
+        background: #8b5cf6;
+      }
+      select {
+        margin-right: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="max-width: 800px; margin: 2rem auto; padding: 1rem">
+      <div style="margin-bottom: 1rem">
+        <select id="nback">
+          <option value="1">1-back</option>
+          <option value="2" selected>2-back</option>
+          <option value="3">3-back</option>
+        </select>
+        <button onclick="reset()" style="width: auto">reset</button>
+      </div>
+      <div
+        id="message"
+        style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem"
+      ></div>
+      <div id="buttons"></div>
+      <div id="grid" class="grid"></div>
+    </div>
+
+    <script>
+      const suits = ["♠️", "♥️", "♣️", "♦️"];
+      const values = [
+        "A",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "J",
+        "Q",
+        "K",
+      ];
+      let hands = [];
+      let currentIdx = 0;
+      let showingPast = false;
+      let recallHidden = true;
+
+      function generateHand() {
+        return Array(8)
+          .fill()
+          .map(() => ({
+            suit: suits[Math.floor(Math.random() * suits.length)],
+            value: values[Math.floor(Math.random() * values.length)],
+          }));
+      }
+
+      function reset() {
+        hands = Array(20).fill().map(generateHand);
+        currentIdx = 0;
+        showingPast = false;
+        recallHidden = true;
+        render();
+      }
+
+      function next() {
+        if (currentIdx >= hands.length) {
+          reset();
+          return;
+        }
+        if (showingPast) {
+          currentIdx++;
+          showingPast = false;
+          recallHidden = true;
+        } else if (
+          currentIdx >= Number(document.getElementById("nback").value)
+        ) {
+          showingPast = true;
+        } else {
+          currentIdx++;
+        }
+        render();
+      }
+
+      function render() {
+        const nback = Number(document.getElementById("nback").value);
+        const message = document.getElementById("message");
+        const buttons = document.getElementById("buttons");
+        const grid = document.getElementById("grid");
+
+        message.textContent = showingPast
+          ? recallHidden
+            ? `try to recall the hand from ${nback} steps ago`
+            : `here's what it was:`
+          : "remember this hand!";
+
+        buttons.innerHTML =
+          showingPast && recallHidden
+            ? '<button class="show" onclick="recallHidden = false; render();">show answer</button>'
+            : '<button class="next" onclick="next()">next</button>';
+
+        const hand = showingPast
+          ? hands[currentIdx - nback]
+          : hands[currentIdx];
+        grid.innerHTML =
+          showingPast && recallHidden
+            ? Array(8).fill('<div class="card hidden">?</div>').join("")
+            : hand
+                .map(
+                  (card) =>
+                    `<div class="card ${showingPast ? "recall" : ""}">${card.value}${card.suit}</div>`,
+                )
+                .join("");
+      }
+
+      reset();
+    </script>
+  </body>
+</html>
