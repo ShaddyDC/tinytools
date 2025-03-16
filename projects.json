@@ -43,5 +43,10 @@
     "title": "Card counting game",
     "description": "Practice your memorisation skills for card games to know what's still in the game",
     "id": "card-count"
+  },
+  {
+    "title": "Date Calc",
+    "description": "Calculate the date of eg the day 4 weeks in the future",
+    "id": "date-calc"
   }
 ]
