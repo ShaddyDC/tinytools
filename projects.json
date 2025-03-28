@@ -48,5 +48,10 @@
     "title": "Date Calc",
     "description": "Calculate the date of eg the day 4 weeks in the future",
     "id": "date-calc"
+  },
+  {
+    "title": "HTML Paste Display",
+    "description": "Paste some html to test what your web page would look like",
+    "id": "html-test"
   }
 ]

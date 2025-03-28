@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>html pastebin thingy v2</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 1em;
+        background-color: #f0f0f0;
+        color: #333;
+      }
+      textarea {
+        width: 98%;
+        height: 15vh; /* reduced height */
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        font-family: monospace;
+        resize: vertical; /* allow vertical resize */
+      }
+      button {
+        padding: 0.5em 1em;
+        margin-bottom: 1em;
+        cursor: pointer;
+        background-color: #444;
+        color: #fff;
+        border: none;
+      }
+      iframe {
+        width: 100%;
+        height: 100%; /* fill container */
+        border: 1px solid #ccc;
+        background-color: #fff;
+      }
+      #container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 2em); /* adjusted for body margin */
+      }
+      #input-area {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+      }
+      #output-area {
+        flex: 1 1 auto; /* takes remaining space */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="input-area">
+        <textarea
+          id="html-input"
+          placeholder="paste html, css, js here..."
+        ></textarea>
+        <button onclick="render()">render af</button>
+      </div>
+      <div id="output-area">
+        <iframe
+          id="output-frame"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-presentation"
+        ></iframe>
+      </div>
+    </div>
+
+    <script>
+      function render() {
+        const input = document.getElementById("html-input").value; // fixed typo: getElementById
+        const iframe = document.getElementById("output-frame"); // fixed typo: getElementById
+        // using srcdoc is generally better for this than messing with data uris or blob urls afaict
+        // sandbox settings are kinda important, lol. 'allow-scripts' lets the js run, 'allow-same-origin' is needed for some apis but might be slightly sus depending on the script. fine for local stuff tho. added a few more bc why not.
+        iframe.srcdoc = input;
+      }
+    </script>
+  </body>
+</html>
