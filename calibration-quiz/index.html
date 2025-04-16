@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>90% Confidence Interval Quiz</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background-color: #f9fafb;
+        color: #111827;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        color: #4b5563;
+      }
+
+      .tip {
+        background-color: #fffbeb;
+        border: 1px solid #fef3c7;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+      }
+
+      .disclaimer {
+        background-color: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+
+      .question-card {
+        background-color: white;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .question-text {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+      }
+
+      .unit {
+        color: #6b7280;
+        font-size: 0.875rem;
+      }
+
+      .estimates {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .estimate-group {
+        flex: 1;
+      }
+
+      .estimate-label {
+        display: block;
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+      }
+
+      .estimate-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.25rem;
+      }
+
+      .submit-btn {
+        width: 100%;
+        background-color: #2563eb;
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+      }
+
+      .submit-btn:hover {
+        background-color: #1d4ed8;
+      }
+
+      .submit-btn:disabled {
+        background-color: #93c5fd;
+        cursor: not-allowed;
+      }
+
+      .results {
+        background-color: white;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+      }
+
+      .results-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .results-score {
+        font-size: 2.25rem;
+        font-weight: 700;
+      }
+
+      .results-analysis {
+        font-size: 1.125rem;
+        margin-top: 1rem;
+      }
+
+      .breakdown-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .question-result {
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .correct {
+        background-color: #f0fdf4;
+        border: 1px solid #dcfce7;
+      }
+
+      .incorrect {
+        background-color: #fef2f2;
+        border: 1px solid #fee2e2;
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .result-label {
+        color: #6b7280;
+      }
+
+      .correct-text {
+        color: #16a34a;
+        font-weight: 500;
+      }
+
+      .incorrect-text {
+        color: #dc2626;
+        font-weight: 500;
+      }
+
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .reset-btn {
+        background-color: #2563eb;
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        color: #2563eb;
+        text-decoration: underline;
+        cursor: pointer;
+        padding: 0.5rem;
+      }
+
+      .explanation {
+        background-color: #f3f4f6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .explanation h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .explanation p {
+        margin-bottom: 0.5rem;
+      }
+
+      .explanation a {
+        color: #2563eb;
+        text-decoration: underline;
+      }
+
+      @media (max-width: 640px) {
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>90% Confidence Interval Quiz</h1>
+        <p>
+          For each question, provide a range where you're 90% confident the true
+          answer falls within.
+        </p>
+        <div class="tip" id="tip">
+          <strong>tip:</strong> make your ranges wide enough to account for
+          uncertainty - people are naturally overconfident!
+        </div>
+        <div class="disclaimer">
+          <strong>disclaimer:</strong> answers are ai-generated as of april 16,
+          2025 and have not been independently verified.
+        </div>
+      </div>
+
+      <div id="quiz-container"></div>
+
+      <div id="results-container" style="display: none"></div>
+    </div>
+
+    <script>
+      // All questions with their answers
+      const allQuestions = [
+        {
+          question: "Surface temperature of the sun (photosphere)",
+          unit: "kelvin (K)",
+          answer: 5772,
+        },
+        {
+          question: "Year of Alexander the Great's birth",
+          unit: "year BCE",
+          answer: 356,
+        },
+        {
+          question: "Heaviest blue whale ever reliably recorded",
+          unit: "metric tonnes (t)",
+          answer: 190,
+        },
+        {
+          question: "Population of the greater Tokyo area (latest census/est.)",
+          unit: "millions of people",
+          answer: 37,
+        },
+        {
+          question: "Mean diameter of the earth",
+          unit: "kilometers (km)",
+          answer: 12742,
+        },
+        {
+          question: "Height of mount everest above sea level (official)",
+          unit: "meters (m)",
+          answer: 8848,
+        },
+        {
+          question: "Average depth of the world's oceans",
+          unit: "meters (m)",
+          answer: 3688,
+        },
+        {
+          question:
+            "Great circle distance from London (LHR) to New York City (JFK)",
+          unit: "kilometers (km)",
+          answer: 5541,
+        },
+        {
+          question: "Number of currently listed, distinct living languages",
+          unit: "count",
+          answer: 7159,
+        },
+        {
+          question: "Speed of light in vacuum (c)",
+          unit: "meters per second (m/s)",
+          answer: 299792458,
+        },
+        {
+          question: "Annual global rice production",
+          unit: "million metric tons",
+          answer: 520,
+        },
+        {
+          question: "Maximum depth of the Mariana Trench",
+          unit: "meters",
+          answer: 10925,
+        },
+        {
+          question: "Number of neurons in the human brain",
+          unit: "billions",
+          answer: 86,
+        },
+        {
+          question: "Maximum flight speed of a peregrine falcon diving",
+          unit: "km/h",
+          answer: 320,
+        },
+        {
+          question: "Total number of stars in the Milky Way galaxy",
+          unit: "billions",
+          answer: 250,
+        },
+        {
+          question: "World's annual chocolate consumption",
+          unit: "million metric tons",
+          answer: 7.7,
+        },
+        {
+          question: "Number of known exoplanets discovered",
+          unit: "count",
+          answer: 5867,
+        },
+        {
+          question: "Age of the oldest living tree",
+          unit: "years",
+          answer: 5067,
+        },
+        {
+          question: "Height of Angel Falls, the world's tallest waterfall",
+          unit: "meters",
+          answer: 979,
+        },
+        {
+          question: "Number of bones in an adult human body",
+          unit: "count",
+          answer: 206,
+        },
+        {
+          question: "Maximum depth of the Grand Canyon",
+          unit: "meters",
+          answer: 1829,
+        },
+        {
+          question: "Average lifespan of a giant tortoise",
+          unit: "years",
+          answer: 150,
+        },
+        {
+          question: "Distance to Alpha Centauri (nearest star system to Earth)",
+          unit: "light years",
+          answer: 4.37,
+        },
+      ];
+
+      let quizQuestions = [];
+      let estimates = [];
+      let results = { correct: 0, total: 0 };
+
+      // Initialize quiz with 10 random questions
+      function initQuiz() {
+        // Shuffle and select 10 questions
+        quizQuestions = shuffleArray(allQuestions).slice(0, 10);
+        estimates = quizQuestions.map(() => ({ low: "", high: "" }));
+
+        renderQuiz();
+      }
+
+      // Render the quiz questions
+      function renderQuiz() {
+        const quizContainer = document.getElementById("quiz-container");
+        quizContainer.innerHTML = "";
+
+        // Create question cards
+        quizQuestions.forEach((question, index) => {
+          const questionCard = document.createElement("div");
+          questionCard.className = "question-card";
+          questionCard.innerHTML = `
+          <p class="question-text">${question.question} <span class="unit">(${question.unit})</span></p>
+          <div class="estimates">
+            <div class="estimate-group">
+              <label class="estimate-label">Low Estimate</label>
+              <input 
+                type="number" 
+                class="estimate-input" 
+                placeholder="Lower bound" 
+                data-index="${index}" 
+                data-bound="low" 
+                value="${estimates[index].low}"
+              >
+            </div>
+            <div class="estimate-group">
+              <label class="estimate-label">High Estimate</label>
+              <input 
+                type="number" 
+                class="estimate-input" 
+                placeholder="Upper bound" 
+                data-index="${index}" 
+                data-bound="high" 
+                value="${estimates[index].high}"
+              >
+            </div>
+          </div>
+        `;
+          quizContainer.appendChild(questionCard);
+        });
+
+        // Create submit button
+        const submitBtn = document.createElement("button");
+        submitBtn.className = "submit-btn";
+        submitBtn.id = "submit-btn";
+        submitBtn.textContent = "Submit Your Estimates";
+        submitBtn.disabled = estimates.some(
+          (est) => est.low === "" || est.high === "",
+        );
+        submitBtn.addEventListener("click", handleSubmit);
+        quizContainer.appendChild(submitBtn);
+
+        // Add event listeners to inputs
+        document.querySelectorAll(".estimate-input").forEach((input) => {
+          input.addEventListener("input", handleEstimateChange);
+        });
+      }
+
+      // Handle estimate input changes
+      function handleEstimateChange(event) {
+        const index = parseInt(event.target.dataset.index);
+        const bound = event.target.dataset.bound;
+        const value = event.target.value;
+
+        estimates[index][bound] = value;
+
+        // Check if all inputs have values to enable submit button
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.disabled = estimates.some(
+          (est) => est.low === "" || est.high === "",
+        );
+      }
+
+      // Handle quiz submission
+      function handleSubmit() {
+        // Count correct answers (where actual is between low and high)
+        let correctCount = 0;
+
+        quizQuestions.forEach((question, index) => {
+          const low = parseFloat(estimates[index].low);
+          const high = parseFloat(estimates[index].high);
+          const actual = question.answer;
+
+          if (!isNaN(low) && !isNaN(high) && low <= actual && actual <= high) {
+            correctCount++;
+          }
+        });
+
+        results = {
+          correct: correctCount,
+          total: quizQuestions.length,
+        };
+
+        document.getElementById("quiz-container").style.display = "none";
+        document.getElementById("tip").style.display = "none";
+        document.getElementById("results-container").style.display = "block";
+
+        renderResults();
+      }
+
+      // Render quiz results
+      function renderResults() {
+        const resultsContainer = document.getElementById("results-container");
+
+        // Create results header
+        const resultsHTML = `
+        <div class="results">
+          <div class="results-header">
+            <h2 class="results-title">Your Results</h2>
+            <p class="results-score">${results.correct} / ${results.total} correct</p>
+            <p class="results-analysis">${getConfidenceAnalysis()}</p>
+          </div>
+          
+          <div class="breakdown">
+            <h3 class="breakdown-title">Question Breakdown</h3>
+            <div id="question-results"></div>
+          </div>
+          
+          <div class="button-group">
+            <button class="reset-btn" id="reset-btn">Try Again with New Questions</button>
+            <button class="toggle-btn" id="toggle-explanation">Show Explanation</button>
+          </div>
+          
+          <div class="explanation" id="explanation" style="display: none;">
+            <h3>About Confidence Intervals</h3>
+            <p>This quiz is based on research that shows most people are overconfident in their estimates, even when explicitly asked to provide 90% confidence intervals.</p>
+            <p>Studies show that when people think they're 90% confident, they're actually closer to 30% confident. The average person only gets about 3 out of 10 questions correct on this type of quiz.</p>
+            <p>We tend to make our ranges too narrow because we fear that wide ranges make us appear ignorant or incompetent. However, the opposite is true - realistic uncertainty estimates demonstrate better calibration and understanding.</p>
+            <p style="margin-top: 1rem; font-size: 0.875rem;">Inspired by <a href="https://blog.codinghorror.com/how-good-an-estimator-are-you/" target="_blank" rel="noopener noreferrer">Jeff Atwood's blog post</a> and Steve McConnell's book "Software Estimation: Demystifying the Black Art".</p>
+          </div>
+        </div>
+      `;
+
+        resultsContainer.innerHTML = resultsHTML;
+
+        // Add question results
+        const questionResultsContainer =
+          document.getElementById("question-results");
+        quizQuestions.forEach((question, index) => {
+          const low = parseFloat(estimates[index].low);
+          const high = parseFloat(estimates[index].high);
+          const actual = question.answer;
+          const isCorrect =
+            !isNaN(low) && !isNaN(high) && low <= actual && actual <= high;
+
+          const resultElement = document.createElement("div");
+          resultElement.className = `question-result ${isCorrect ? "correct" : "incorrect"}`;
+          resultElement.innerHTML = `
+          <p class="question-text">${question.question}</p>
+          <div class="result-grid">
+            <div>
+              <span class="result-label">Your range:</span> ${low} - ${high} ${question.unit}
+            </div>
+            <div>
+              <span class="result-label">Actual value:</span> ${actual} ${question.unit}
+            </div>
+            <div>
+              <span class="${isCorrect ? "correct-text" : "incorrect-text"}">
+                ${isCorrect ? "✓ Correct" : "✗ Incorrect"}
+              </span>
+            </div>
+          </div>
+        `;
+
+          questionResultsContainer.appendChild(resultElement);
+        });
+
+        // Add event listeners
+        document
+          .getElementById("reset-btn")
+          .addEventListener("click", resetQuiz);
+        document
+          .getElementById("toggle-explanation")
+          .addEventListener("click", toggleExplanation);
+      }
+
+      // Reset quiz
+      function resetQuiz() {
+        document.getElementById("results-container").style.display = "none";
+        document.getElementById("quiz-container").style.display = "block";
+        document.getElementById("tip").style.display = "block";
+
+        initQuiz();
+      }
+
+      // Toggle explanation
+      function toggleExplanation() {
+        const explanation = document.getElementById("explanation");
+        const toggleButton = document.getElementById("toggle-explanation");
+
+        if (explanation.style.display === "none") {
+          explanation.style.display = "block";
+          toggleButton.textContent = "Hide Explanation";
+        } else {
+          explanation.style.display = "none";
+          toggleButton.textContent = "Show Explanation";
+        }
+      }
+
+      // Get confidence analysis text based on results
+      function getConfidenceAnalysis() {
+        const expected = quizQuestions.length * 0.9; // 90% of 10 questions = 9
+        const actual = results.correct;
+
+        if (actual < expected * 0.5) {
+          return "You're SEVERELY overconfident! Your ranges were too narrow to capture the true values.";
+        } else if (actual < expected * 0.8) {
+          return "You're overconfident. Most people are - they're typically 30% confident when they think they're 90% confident.";
+        } else if (actual >= expected * 0.8 && actual < expected) {
+          return "You're slightly overconfident, but better than most people at calibrating your uncertainty!";
+        } else if (actual === Math.floor(expected)) {
+          return "You're well-calibrated! This is rare - most people only get 2-3 correct out of 10.";
+        } else {
+          return "You're underconfident! Your ranges were wider than needed for 90% confidence.";
+        }
+      }
+
+      // Shuffle array (Fisher-Yates algorithm)
+      function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+      }
+
+      // Initialize on page load
+      window.addEventListener("DOMContentLoaded", initQuiz);
+    </script>
+  </body>
+</html>

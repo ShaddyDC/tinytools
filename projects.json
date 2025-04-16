@@ -53,5 +53,10 @@
     "title": "HTML Paste Display",
     "description": "Paste some html to test what your web page would look like",
     "id": "html-test"
+  },
+  {
+    "title": "Calibration quiz",
+    "description": "How good are you at estimating 90% confidence intervals?",
+    "id": "calibration-quiz"
   }
 ]
