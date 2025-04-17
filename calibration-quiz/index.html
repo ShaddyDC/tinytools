@@ -101,6 +101,13 @@
         border-radius: 0.25rem;
       }
 
+      .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        min-height: 1rem;
+      }
+
       .submit-btn {
         width: 100%;
         background-color: #2563eb;
@@ -409,24 +416,30 @@
             <div class="estimate-group">
               <label class="estimate-label">Low Estimate</label>
               <input 
-                type="number" 
+                type="text" 
+                inputmode="numeric" 
+                pattern="[0-9]*"
                 class="estimate-input" 
                 placeholder="Lower bound" 
                 data-index="${index}" 
                 data-bound="low" 
                 value="${estimates[index].low}"
               >
+              <div class="error-message" id="low-error-${index}"></div>
             </div>
             <div class="estimate-group">
               <label class="estimate-label">High Estimate</label>
               <input 
-                type="number" 
+                type="text" 
+                inputmode="numeric" 
+                pattern="[0-9]*"
                 class="estimate-input" 
                 placeholder="Upper bound" 
                 data-index="${index}" 
                 data-bound="high" 
                 value="${estimates[index].high}"
               >
+              <div class="error-message" id="high-error-${index}"></div>
             </div>
           </div>
         `;
@@ -450,19 +463,60 @@
         });
       }
 
+      // Function to clean non-numeric input
+      function cleanNumericInput(input) {
+        return input.replace(/[^0-9]/g, "");
+      }
+
       // Handle estimate input changes
       function handleEstimateChange(event) {
         const index = parseInt(event.target.dataset.index);
         const bound = event.target.dataset.bound;
-        const value = event.target.value;
+        // Clean the input to ensure only numbers
+        const cleanedValue = cleanNumericInput(event.target.value);
 
-        estimates[index][bound] = value;
+        // Update the input field with cleaned value if it changed
+        if (event.target.value !== cleanedValue) {
+          event.target.value = cleanedValue;
+        }
 
-        // Check if all inputs have values to enable submit button
+        estimates[index][bound] = cleanedValue;
+
+        // Check if low > high and show error
+        const lowValue = parseInt(estimates[index].low) || 0;
+        const highValue = parseInt(estimates[index].high) || 0;
+
+        const lowErrorElement = document.getElementById(`low-error-${index}`);
+        const highErrorElement = document.getElementById(`high-error-${index}`);
+
+        // Clear previous errors
+        lowErrorElement.textContent = "";
+        highErrorElement.textContent = "";
+
+        let hasRangeError = false;
+
+        // Only check if both values are entered
+        if (estimates[index].low !== "" && estimates[index].high !== "") {
+          if (lowValue > highValue) {
+            highErrorElement.textContent =
+              "High value must be greater than or equal to low value";
+            hasRangeError = true;
+          }
+        }
+
+        // Check if all inputs have values and no range errors to enable submit button
         const submitBtn = document.getElementById("submit-btn");
-        submitBtn.disabled = estimates.some(
+        const allInputsFilled = !estimates.some(
           (est) => est.low === "" || est.high === "",
         );
+
+        // Check all questions for range errors
+        const anyRangeErrors = estimates.some((est, idx) => {
+          if (est.low === "" || est.high === "") return false;
+          return parseInt(est.low) > parseInt(est.high);
+        });
+
+        submitBtn.disabled = !allInputsFilled || anyRangeErrors;
       }
 
       // Handle quiz submission
