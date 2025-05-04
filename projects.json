@@ -58,5 +58,10 @@
     "title": "Calibration quiz",
     "description": "How good are you at estimating 90% confidence intervals?",
     "id": "calibration-quiz"
+  },
+  {
+    "title": "Age calculator",
+    "description": "How long ago were those dates again?",
+    "id": "age-calc"
   }
 ]

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>tempus fugit tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg-color: #1a1a1a;
+        --fg-color: #e0e0e0;
+        --input-bg: #333;
+        --input-border: #555;
+        --button-bg: #444;
+        --button-hover: #555;
+        --accent-color: #6fa8dc; /* a muted blue */
+        --danger-color: #c94c4c;
+        --entry-bg: #282828;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--fg-color);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol";
+        line-height: 1.6;
+        padding: 20px;
+        max-width: 700px;
+        margin: auto;
+        font-size: 14px;
+      }
+      h1 {
+        color: var(--accent-color);
+        font-weight: 300;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .input-group,
+      .controls {
+        background-color: var(--entry-bg);
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap; /* useful for smaller screens */
+        align-items: center;
+      }
+      input[type="text"],
+      input[type="date"] {
+        background-color: var(--input-bg);
+        color: var(--fg-color);
+        border: 1px solid var(--input-border);
+        padding: 8px 10px;
+        border-radius: 3px;
+        flex-grow: 1; /* allow inputs to take available space */
+      }
+      button,
+      label.button-like {
+        background-color: var(--button-bg);
+        color: var(--fg-color);
+        border: none;
+        padding: 8px 15px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        font-size: 1em; /* match body font size */
+        display: inline-block; /* for label */
+        text-align: center;
+      }
+      button:hover,
+      label.button-like:hover {
+        background-color: var(--button-hover);
+      }
+      button.remove-btn {
+        background-color: var(--danger-color);
+        padding: 4px 8px;
+        font-size: 0.8em;
+      }
+      button.remove-btn:hover {
+        background-color: #e06666; /* lighter red on hover */
+      }
+      #entries-list {
+        list-style: none;
+        padding: 0;
+      }
+      #entries-list li {
+        background-color: var(--entry-bg);
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* wrap content within list items */
+        gap: 10px; /* spacing between elements inside li */
+      }
+      .entry-details {
+        flex-grow: 1; /* take available space */
+        min-width: 200px; /* prevent excessive shrinking */
+      }
+      .entry-name {
+        font-weight: bold;
+        color: var(--accent-color);
+        margin-right: 10px;
+      }
+      .entry-date {
+        font-style: italic;
+        color: #aaa;
+        margin-right: 10px;
+      }
+      .entry-ago {
+        color: #ccc;
+      }
+      .controls button,
+      .controls label.button-like {
+        margin-right: 10px; /* spacing for control buttons */
+      }
+      input[type="file"] {
+        display: none; /* hide the default file input */
+      }
+      /* minor adjustments for small screens */
+      @media (max-width: 600px) {
+        .input-group {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        #entries-list li {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        button.remove-btn {
+          margin-top: 10px; /* space when button wraps below */
+          align-self: flex-end; /* push to the right */
+        }
+        .controls {
+          justify-content: center; /* center control buttons */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>tempus fugit tracker</h1>
+    <div class="input-group">
+      <input
+        type="text"
+        id="entry-name"
+        placeholder="event name (e.g., birthday)"
+      />
+      <input type="date" id="entry-date" />
+      <button id="add-entry-btn">add event</button>
+    </div>
+
+    <ul id="entries-list"></ul>
+
+    <div class="controls">
+      <button id="export-btn">export data</button>
+      <input type="file" id="import-file" accept=".json" />
+      <label for="import-file" class="button-like">import data</label>
+      <button
+        id="clear-all-btn"
+        class="remove-btn"
+        style="background-color: var(--danger-color)"
+      >
+        clear all
+      </button>
+    </div>
+
+    <script>
+      // js scope begins. brace yourself.
+      const nameInput = document.getElementById("entry-name");
+      const dateInput = document.getElementById("entry-date");
+      const addBtn = document.getElementById("add-entry-btn");
+      const entriesList = document.getElementById("entries-list");
+      const exportBtn = document.getElementById("export-btn");
+      const importFile = document.getElementById("import-file");
+      const clearAllBtn = document.getElementById("clear-all-btn");
+
+      const STORAGE_KEY = "timeAgoEntries"; // namespace in localStorage
+
+      // load entries from localStorage. returns empty array if nothing's there or it's invalid json.
+      const loadEntries = () => {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return [];
+        try {
+          const parsed = JSON.parse(stored);
+          // basic validation - check if it's an array. more checks could be added.
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          console.error("error loading entries from localStorage:", e);
+          // lol localStorage is probably corrupted. nuke it? nah, just start fresh.
+          return [];
+        }
+      };
+
+      // save entries to localStorage. overwrites existing.
+      const saveEntries = (entries) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      };
+
+      // calculate the difference between a date string ('yyyy-mm-dd') and now.
+      // revised parsing to be more robust than just trusting new Date(string).
+      const calculateTimeAgo = (dateString) => {
+        let start;
+        // try manual parsing first for yyyy-mm-dd format
+        const parts =
+          typeof dateString === "string"
+            ? dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+            : null;
+
+        if (parts) {
+          // parts[0] is full match, [1] is yyyy, [2] is mm, [3] is dd
+          const year = parseInt(parts[1], 10);
+          const month = parseInt(parts[2], 10); // 1-indexed month from string
+          const day = parseInt(parts[3], 10);
+
+          // check basic validity of parts
+          if (year > 0 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            // construct date using year, month (0-indexed), day
+            // this uses local timezone implicitly
+            start = new Date(year, month - 1, day);
+          } else {
+            // parts matched regex but values are nonsensical (e.g., 2000-13-01)
+            console.error(`Invalid date components parsed from: ${dateString}`);
+            start = new Date(NaN); // force invalid date
+          }
+        } else {
+          // fallback if regex fails - maybe the stored string wasn't yyyy-mm-dd?
+          console.warn(
+            `Date string "${dateString}" did not match YYYY-MM-DD format, attempting direct parse.`,
+          );
+          start = new Date(dateString + "T00:00:00"); // try original method as last resort
+        }
+
+        const end = new Date(); // now
+
+        // isNaN check covers both failed regex parsing and failed Date constructor
+        if (isNaN(start.getTime())) {
+          console.error(
+            `Final check: Failed to create valid Date object for input: ${dateString}`,
+          );
+          return "invalid date"; // the error message you saw
+        }
+
+        if (start > end) return "in the future... sus";
+
+        let years = end.getFullYear() - start.getFullYear();
+        let months = end.getMonth() - start.getMonth();
+        let days = end.getDate() - start.getDate();
+
+        // borrow days from months if needed
+        if (days < 0) {
+          months--;
+          // get days in the month *before* the end date's month
+          const daysInLastFullMonth = new Date(
+            end.getFullYear(),
+            end.getMonth(),
+            0,
+          ).getDate();
+          days += daysInLastFullMonth;
+        }
+
+        // borrow months from years if needed
+        if (months < 0) {
+          years--;
+          months += 12;
+        }
+
+        // edge case: check if it's literally the same calendar day
+        const sameDay =
+          end.getFullYear() === start.getFullYear() &&
+          end.getMonth() === start.getMonth() &&
+          end.getDate() === start.getDate();
+
+        if (sameDay) return "today";
+
+        const timeParts = [];
+        if (years > 0) timeParts.push(`${years} year${years > 1 ? "s" : ""}`);
+        if (months > 0)
+          timeParts.push(`${months} month${months > 1 ? "s" : ""}`);
+        // adjusted logic: show days if < 1 year old OR if there are years but 0 months.
+        if (days > 0 && (years === 0 || months === 0)) {
+          timeParts.push(`${days} day${days > 1 ? "s" : ""}`);
+        }
+        // if calculation resulted in 0y/0m/0d but it's not *today* (e.g. less than 24hrs ago but crossed midnight)
+        if (timeParts.length === 0 && !sameDay)
+          return "yesterday or earlier today"; // slightly better than just 'today'
+
+        if (timeParts.length === 0) return "today"; // fallback
+
+        return timeParts.join(", ") + " ago";
+      };
+
+      // render the whole list based on the current state of 'entries' array.
+      const renderEntries = () => {
+        const entries = loadEntries();
+        entriesList.innerHTML = ""; // clear existing list. inefficient but simple.
+
+        if (entries.length === 0) {
+          entriesList.innerHTML = "<li>no events tracked yet. get on it.</li>";
+          return;
+        }
+
+        entries.forEach((entry, index) => {
+          const li = document.createElement("li");
+
+          const detailsDiv = document.createElement("div");
+          detailsDiv.classList.add("entry-details");
+
+          const nameSpan = document.createElement("span");
+          nameSpan.classList.add("entry-name");
+          nameSpan.textContent = entry.name || "unnamed event"; // fallback for missing names
+
+          const dateSpan = document.createElement("span");
+          dateSpan.classList.add("entry-date");
+          // ensure date is string and format if needed, though input type="date" should give yyyy-mm-dd
+          dateSpan.textContent =
+            typeof entry.date === "string" ? entry.date : "invalid date format";
+
+          const agoSpan = document.createElement("span");
+          agoSpan.classList.add("entry-ago");
+          agoSpan.textContent =
+            typeof entry.date === "string"
+              ? calculateTimeAgo(entry.date)
+              : "error";
+
+          detailsDiv.appendChild(nameSpan);
+          detailsDiv.appendChild(dateSpan);
+          detailsDiv.appendChild(document.createTextNode(" - ")); // separator
+          detailsDiv.appendChild(agoSpan);
+
+          const removeBtn = document.createElement("button");
+          removeBtn.classList.add("remove-btn");
+          removeBtn.textContent = "remove";
+          removeBtn.dataset.index = index; // store index to know which one to remove
+
+          removeBtn.addEventListener("click", (event) => {
+            const indexToRemove = parseInt(event.target.dataset.index, 10);
+            removeEntry(indexToRemove);
+          });
+
+          li.appendChild(detailsDiv);
+          li.appendChild(removeBtn);
+          entriesList.appendChild(li);
+        });
+      };
+
+      // add a new entry.
+      const addEntry = () => {
+        const name = nameInput.value.trim();
+        const date = dateInput.value; // expects 'yyyy-mm-dd'
+
+        // minimal validation. be real, it's javascript.
+        if (!date) {
+          alert("date is REQUIRED."); // caps for emphasis
+          return;
+        }
+        // maybe check date format more strictly? nah. html5 date input helps.
+        // maybe check if name is empty? nah, allow it.
+
+        const newEntry = {
+          name: name || `event #${loadEntries().length + 1}`,
+          date: date,
+        }; // default name if empty
+        const entries = loadEntries();
+        entries.push(newEntry);
+        // maybe sort entries by date? seems reasonable.
+        entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+        saveEntries(entries);
+
+        // clear inputs after adding
+        nameInput.value = "";
+        dateInput.value = "";
+
+        renderEntries(); // update the ui
+      };
+
+      // remove an entry by its index in the array.
+      const removeEntry = (index) => {
+        const entries = loadEntries();
+        if (index >= 0 && index < entries.length) {
+          entries.splice(index, 1); // remove 1 element at 'index'
+          saveEntries(entries);
+          renderEntries(); // update the ui
+        } else {
+          console.error("invalid index provided for removal:", index); // shouldn't happen with button data-index tho
+        }
+      };
+
+      // export data to a json file.
+      const exportData = () => {
+        const entries = loadEntries();
+        if (entries.length === 0) {
+          alert("nothing to export, my dude.");
+          return;
+        }
+        const dataStr = JSON.stringify(entries, null, 2); // pretty print json
+        const dataBlob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        // generate a filename - maybe with date?
+        const timestamp = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+        link.download = `time-ago-entries-${timestamp}.json`;
+        document.body.appendChild(link); // required for firefox
+        link.click();
+        document.body.removeChild(link); // clean up
+        URL.revokeObjectURL(url); // free up memory
+      };
+
+      // handle file import.
+      const importData = (event) => {
+        const file = event.target.files[0];
+        if (!file) return; // no file selected
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const importedEntries = JSON.parse(e.target.result);
+            // very basic validation: is it an array? does it look like our structure?
+            if (!Array.isArray(importedEntries))
+              throw new Error("imported data is not an array.");
+            // maybe check if items have 'name' and 'date'? prob overkill for quick app.
+            // check every item? lol no. trust the user? maybe?
+
+            // ask user if they want to replace or merge? nah, replace is simpler.
+            if (
+              confirm(
+                `replace current ${loadEntries().length} entries with ${importedEntries.length} from the file? this CANNOT be undone.`,
+              )
+            ) {
+              // quick validation on first item if exists
+              if (
+                importedEntries.length > 0 &&
+                (typeof importedEntries[0].name === "undefined" ||
+                  typeof importedEntries[0].date === "undefined")
+              ) {
+                alert(
+                  "import failed: file content does not seem to match the expected format (array of {name, date} objects).",
+                );
+                return; // bail out
+              }
+
+              saveEntries(importedEntries); // overwrite current data
+              renderEntries(); // update ui
+              alert("import successful.");
+            } else {
+              alert("import cancelled.");
+            }
+          } catch (error) {
+            console.error("error importing file:", error);
+            alert(
+              `import failed: ${error.message}. make sure it's a valid json file generated by this app.`,
+            );
+          } finally {
+            // reset file input value so user can select the same file again if needed
+            importFile.value = null;
+          }
+        };
+        reader.onerror = (error) => {
+          console.error("file reader error:", error);
+          alert("error reading the file.");
+          importFile.value = null; // reset
+        };
+        reader.readAsText(file); // read file content as text
+      };
+
+      // clear all entries. requires confirmation bc it's destructive.
+      const clearAllEntries = () => {
+        if (loadEntries().length === 0) {
+          alert("bruh there's nothing to clear.");
+          return;
+        }
+        if (
+          confirm(
+            "are you SURE you want to delete ALL entries? this is irreversible.",
+          )
+        ) {
+          saveEntries([]); // save an empty array
+          renderEntries(); // update ui
+          alert("all entries cleared.");
+        } else {
+          alert("clear operation cancelled.");
+        }
+      };
+
+      // event listeners setup
+      addBtn.addEventListener("click", addEntry);
+      // allow adding with enter key in date input (maybe name too?)
+      dateInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          addEntry();
+        }
+      });
+      nameInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          addEntry(); // might be slightly annoying if user just wants to go to date field, but eh.
+        }
+      });
+
+      exportBtn.addEventListener("click", exportData);
+      importFile.addEventListener("change", importData);
+      clearAllBtn.addEventListener("click", clearAllEntries);
+
+      // initial render on page load.
+      document.addEventListener("DOMContentLoaded", renderEntries);
+
+      // maybe refresh the 'ago' calculation periodically? like every minute?
+      // seems like overkill for this scope. user can refresh page if needed.
+      // setInterval(renderEntries, 60 * 1000); // uncomment for auto-refresh every minute
+    </script>
+  </body>
+</html>
