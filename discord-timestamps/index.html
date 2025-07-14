@@ -6,8 +6,8 @@
     <title>Discord Timestamp Generator</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         max-width: 800px;
         margin: 2rem auto;
         padding: 0 1rem;
@@ -24,16 +24,31 @@
         color: #5865f2;
         margin-top: 0;
       }
+      h2 {
+        color: #5865f2;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        border-top: 1px solid #eee;
+        padding-top: 2rem;
+      }
       .input-group {
         margin-bottom: 2rem;
       }
-      input[type="datetime-local"] {
+      input[type="datetime-local"],
+      input[type="text"],
+      input[type="number"],
+      textarea {
         padding: 0.5rem;
         font-size: 1rem;
         border: 1px solid #ddd;
         border-radius: 4px;
         width: 100%;
         max-width: 300px;
+      }
+      textarea {
+        max-width: 500px;
+        min-height: 60px;
+        resize: vertical;
       }
       .formats {
         display: grid;
@@ -79,6 +94,31 @@
       .copied {
         background: #43b581;
       }
+      .calendar-section {
+        border-top: 1px solid #eee;
+        padding-top: 2rem;
+        margin-top: 2rem;
+      }
+      .calendar-inputs {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .duration-input {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .duration-input input {
+        max-width: 100px;
+      }
+      .download-btn {
+        background: #43b581;
+        margin-top: 1rem;
+      }
+      .download-btn:hover {
+        background: #3ca374;
+      }
       @media (max-width: 700px) {
         .format-card {
           grid-template-columns: 1fr;
@@ -97,6 +137,50 @@
       </div>
 
       <div class="formats"></div>
+
+      <h2>Calendar Invite Generator</h2>
+      <div class="calendar-section">
+        <div class="calendar-inputs">
+          <div>
+            <label for="eventTitle">Event Title:</label><br />
+            <input type="text" id="eventTitle" placeholder="Meeting Title" />
+          </div>
+
+          <div>
+            <label for="eventDescription">Description (optional):</label><br />
+            <textarea
+              id="eventDescription"
+              placeholder="Meeting details..."
+            ></textarea>
+          </div>
+
+          <div>
+            <label>Duration:</label><br />
+            <div class="duration-input">
+              <input
+                type="number"
+                id="durationHours"
+                min="0"
+                max="23"
+                value="1"
+              />
+              <span>hours</span>
+              <input
+                type="number"
+                id="durationMinutes"
+                min="0"
+                max="59"
+                value="0"
+              />
+              <span>minutes</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="download-btn" onclick="generateCalendarInvite()">
+          Download Calendar Invite (.ics)
+        </button>
+      </div>
     </div>
 
     <script>
@@ -270,6 +354,66 @@
       setInterval(updateTimestamps, 1000);
 
       updateTimestamps();
+
+      // Calendar functionality
+      function formatDateForICS(date) {
+        return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      }
+
+      function generateUID() {
+        return "discord-timestamp-" + Date.now() + "@generator.local";
+      }
+
+      function generateCalendarInvite() {
+        const startDate = new Date(datetimeInput.value);
+        const title = document.getElementById("eventTitle").value || "Event";
+        const description =
+          document.getElementById("eventDescription").value || "";
+        const durationHours =
+          parseInt(document.getElementById("durationHours").value) || 0;
+        const durationMinutes =
+          parseInt(document.getElementById("durationMinutes").value) || 0;
+
+        // Calculate end time
+        const endDate = new Date(startDate);
+        endDate.setHours(endDate.getHours() + durationHours);
+        endDate.setMinutes(endDate.getMinutes() + durationMinutes);
+
+        // Generate ICS content
+        const icsContent = [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//Discord Timestamp Generator//EN",
+          "CALSCALE:GREGORIAN",
+          "METHOD:PUBLISH",
+          "BEGIN:VEVENT",
+          `UID:${generateUID()}`,
+          `DTSTAMP:${formatDateForICS(new Date())}`,
+          `DTSTART:${formatDateForICS(startDate)}`,
+          `DTEND:${formatDateForICS(endDate)}`,
+          `SUMMARY:${title}`,
+          description ? `DESCRIPTION:${description.replace(/\n/g, "\\n")}` : "",
+          "STATUS:CONFIRMED",
+          "SEQUENCE:0",
+          "END:VEVENT",
+          "END:VCALENDAR",
+        ]
+          .filter((line) => line !== "")
+          .join("\r\n");
+
+        // Create and download file
+        const blob = new Blob([icsContent], {
+          type: "text/calendar;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
     </script>
   </body>
 </html>
