@@ -122,10 +122,34 @@
 
     <div class="input-group">
       <label for="recipe">Paste your recipe here:</label>
-      <textarea
-        id="recipe"
-        placeholder="Paste your recipe text here..."
-      ></textarea>
+      <textarea id="recipe" placeholder="Paste your recipe text here...">
+Classic Chocolate Chip Cookies (Makes 4 servings)
+
+Ingredients:
+2 1/4 cups all-purpose flour
+1 tsp baking soda
+1 tsp salt
+1 cup butter, softened
+3/4 cup granulated sugar
+3/4 cup packed brown sugar
+2 large eggs
+2 tsp vanilla extract
+2 cups chocolate chips
+1/2 cup chopped walnuts (optional)
+
+Instructions:
+1. Preheat oven to 375 degrees F
+2. Mix flour, baking soda and salt in medium bowl
+3. Beat butter and both sugars until creamy (about 3 minutes)
+4. Add eggs one at a time, then vanilla
+5. Gradually stir in flour mixture
+6. Fold in chocolate chips and nuts
+7. Drop rounded tablespoons onto ungreased baking sheets
+8. Bake 9 to 11 minutes until golden brown
+9. Cool on baking sheet for 2 minutes before removing
+
+Makes about 60 cookies. Bake time may vary by 1 to 2 minutes depending on your oven.</textarea
+      >
     </div>
 
     <div class="input-group">
@@ -186,10 +210,11 @@
 
         const convertedRecipe = recipe.replace(numberPattern, (match) => {
           const decimal = convertToDecimal(match);
-          return formatNumber(decimal * ratio);
+          const converted = formatNumber(decimal * ratio);
+          return `<mark>${converted}</mark>`;
         });
 
-        document.getElementById("output").textContent = convertedRecipe;
+        document.getElementById("output").innerHTML = convertedRecipe;
       }
     </script>
   </body>
