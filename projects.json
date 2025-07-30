@@ -63,5 +63,10 @@
     "title": "Age calculator",
     "description": "How long ago were those dates again?",
     "id": "age-calc"
+  },
+  {
+    "title": "Reverdle",
+    "description": "How long can you dance around guessing the word?",
+    "id": "reverdle"
   }
 ]

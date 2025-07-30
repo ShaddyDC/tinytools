@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reverse Wordle</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #1a1a2e;
+        color: #eee;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #888;
+        margin-bottom: 20px;
+      }
+
+      .controls {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.2s;
+      }
+
+      button:hover:not(:disabled) {
+        background: #2563eb;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .game-over {
+        background: #065f46;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .board {
+        margin-bottom: 30px;
+      }
+
+      .row {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        margin-bottom: 5px;
+      }
+
+      .tile {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+
+      .tile.correct {
+        background: #059669;
+      }
+
+      .tile.present {
+        background: #d97706;
+      }
+
+      .tile.absent {
+        background: #4b5563;
+      }
+
+      .input-area {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      input {
+        flex: 1;
+        padding: 12px;
+        font-size: 20px;
+        background: #374151;
+        border: 2px solid #4b5563;
+        border-radius: 8px;
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #3b82f6;
+      }
+
+      .error {
+        color: #ef4444;
+        text-align: center;
+        margin-bottom: 20px;
+        min-height: 20px;
+      }
+
+      .constraints {
+        background: #374151;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      .constraints h3 {
+        margin-bottom: 10px;
+      }
+
+      .constraint-item {
+        margin-bottom: 8px;
+      }
+
+      .constraint-label {
+        font-weight: bold;
+        margin-right: 8px;
+      }
+
+      .correct {
+        color: #10b981;
+      }
+      .present {
+        color: #f59e0b;
+      }
+      .absent {
+        color: #9ca3af;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      .target-word {
+        text-align: center;
+        margin: 20px 0;
+        padding: 15px;
+        background: #1f2937;
+        border-radius: 8px;
+        font-size: 24px;
+        letter-spacing: 0.2em;
+        font-weight: bold;
+        color: #60a5fa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Reverse Wordle</h1>
+      <p class="subtitle">Try to take as many guesses as possible!</p>
+
+      <div class="controls">
+        <button id="newGame">New Game</button>
+        <button id="toggleMode" style="margin-left: 10px">
+          Switch to Known Word Mode
+        </button>
+      </div>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px">Loading word lists...</p>
+      </div>
+
+      <div id="gameArea" style="display: none">
+        <div
+          id="targetWordDisplay"
+          class="target-word"
+          style="display: none"
+        ></div>
+
+        <div id="gameOver" class="game-over" style="display: none"></div>
+
+        <div id="board" class="board"></div>
+
+        <div id="inputArea" class="input-area">
+          <input
+            type="text"
+            id="guessInput"
+            maxlength="5"
+            placeholder="Enter guess"
+          />
+          <button id="submitGuess">Submit</button>
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <div class="constraints">
+          <h3>Constraints:</h3>
+          <div id="constraints"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Game state
+      let targetWord = "";
+      let guesses = [];
+      let gameOver = false;
+      let knownPositions = {}; // {0: 'A', 1: 'B', ...}
+      let knownLetters = new Set(); // letters in word but position unknown
+      let excludedLetters = new Set(); // letters not in word
+      let testedPositions = {}; // {letter: Set of tested positions}
+      let letterCounts = {}; // {letter: {min: n, found: n}} track frequency constraints
+      let wordList = [];
+      let validGuesses = new Set();
+      let knownWordMode = false; // New mode flag
+
+      // DOM elements
+      const loadingEl = document.getElementById("loading");
+      const gameAreaEl = document.getElementById("gameArea");
+      const boardEl = document.getElementById("board");
+      const guessInputEl = document.getElementById("guessInput");
+      const submitButtonEl = document.getElementById("submitGuess");
+      const errorEl = document.getElementById("error");
+      const constraintsEl = document.getElementById("constraints");
+      const gameOverEl = document.getElementById("gameOver");
+      const newGameButtonEl = document.getElementById("newGame");
+      const toggleModeButtonEl = document.getElementById("toggleMode");
+      const targetWordDisplayEl = document.getElementById("targetWordDisplay");
+
+      const inputAreaEl = document.getElementById("inputArea");
+
+      // Fetch word lists
+      async function fetchWordLists() {
+        try {
+          // Fetch answer list
+          const answersResponse = await fetch(
+            "https://raw.githubusercontent.com/tabatkins/wordle-list/main/words",
+          );
+          const answersText = await answersResponse.text();
+          const answerWords = answersText
+            .split("\n")
+            .filter((w) => w.length === 5)
+            .map((w) => w.toUpperCase());
+
+          // Fetch valid guesses
+          const guessesResponse = await fetch(
+            "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt",
+          );
+          const guessesText = await guessesResponse.text();
+          const allWords = guessesText
+            .split("\n")
+            .filter((w) => w.length === 5)
+            .map((w) => w.toUpperCase())
+            .filter((w) => /^[A-Z]{5}$/.test(w));
+
+          wordList =
+            answerWords.length > 0 ? answerWords : ["CRANE", "SLATE", "CRISP"];
+          validGuesses = new Set([...answerWords, ...allWords.slice(0, 5000)]);
+
+          if (wordList.length > 0) {
+            startNewGame();
+          }
+        } catch (err) {
+          console.error("Failed to fetch word lists:", err);
+          // Fallback
+          wordList = ["CRANE", "SLATE", "CRISP", "PLUMB", "PHASE"];
+          validGuesses = new Set(wordList);
+          startNewGame();
+        } finally {
+          loadingEl.style.display = "none";
+          gameAreaEl.style.display = "block";
+        }
+      }
+
+      function toggleMode() {
+        knownWordMode = !knownWordMode;
+        toggleModeButtonEl.textContent = knownWordMode
+          ? "Switch to Hidden Word Mode"
+          : "Switch to Known Word Mode";
+        startNewGame();
+      }
+
+      function startNewGame() {
+        targetWord = wordList[Math.floor(Math.random() * wordList.length)];
+        guesses = [];
+        gameOver = false;
+        knownPositions = {};
+        knownLetters = new Set();
+        excludedLetters = new Set();
+        testedPositions = {};
+        letterCounts = {};
+
+        guessInputEl.value = "";
+        errorEl.textContent = "";
+        gameOverEl.style.display = "none";
+        inputAreaEl.style.display = "flex";
+
+        // Show/hide target word based on mode
+        if (knownWordMode) {
+          targetWordDisplayEl.style.display = "block";
+          targetWordDisplayEl.textContent = `Target: ${targetWord}`;
+        } else {
+          targetWordDisplayEl.style.display = "none";
+        }
+
+        updateBoard();
+        updateConstraints();
+      }
+
+      function evaluateGuess(guess) {
+        const result = Array(5).fill("absent");
+        const targetCounts = {};
+
+        // Count letters in target
+        for (let letter of targetWord) {
+          targetCounts[letter] = (targetCounts[letter] || 0) + 1;
+        }
+
+        // First pass: mark correct positions
+        for (let i = 0; i < 5; i++) {
+          if (guess[i] === targetWord[i]) {
+            result[i] = "correct";
+            targetCounts[guess[i]]--;
+          }
+        }
+
+        // Second pass: mark present letters
+        for (let i = 0; i < 5; i++) {
+          if (result[i] === "absent" && targetCounts[guess[i]] > 0) {
+            result[i] = "present";
+            targetCounts[guess[i]]--;
+          }
+        }
+
+        return result;
+      }
+
+      function validateGuess(guess) {
+        // Count letter frequencies in the guess
+        const guessLetterCounts = {};
+        for (let letter of guess) {
+          guessLetterCounts[letter] = (guessLetterCounts[letter] || 0) + 1;
+        }
+
+        // Check if we're using more of any letter than we know exists
+        for (let [letter, count] of Object.entries(guessLetterCounts)) {
+          if (letterCounts[letter] && letterCounts[letter].maxFound) {
+            const knownCount = letterCounts[letter].found;
+            if (count > knownCount) {
+              return `Cannot use ${letter} ${count} times - only ${knownCount} in the word`;
+            }
+          }
+        }
+
+        // Check excluded letters (only those with no known instances)
+        for (let letter of guess) {
+          if (excludedLetters.has(letter) && !letterCounts[letter]) {
+            return `Cannot use ${letter} - it's not in the word`;
+          }
+        }
+
+        // Check known positions
+        for (let [pos, letter] of Object.entries(knownPositions)) {
+          if (guess[pos] !== letter) {
+            return `Position ${parseInt(pos) + 1} must be ${letter}`;
+          }
+        }
+
+        // Check known letters in untested positions
+        for (let letter of knownLetters) {
+          if (!guess.includes(letter)) {
+            return `Must use ${letter} somewhere in the word`;
+          }
+
+          const guessPos = guess.indexOf(letter);
+          const tested = testedPositions[letter] || new Set();
+
+          if (
+            tested.has(guessPos) &&
+            !(guessPos in knownPositions && knownPositions[guessPos] === letter)
+          ) {
+            return `Must try ${letter} in a new position`;
+          }
+        }
+
+        return null;
+      }
+
+      function updateGameState(guess, result) {
+        // Track which letters had at least one gray result
+        const grayLetters = new Set();
+
+        // First, count confirmed instances of each letter in this guess
+        const confirmedInGuess = {};
+
+        for (let i = 0; i < 5; i++) {
+          const letter = guess[i];
+
+          if (result[i] === "correct" || result[i] === "present") {
+            confirmedInGuess[letter] = (confirmedInGuess[letter] || 0) + 1;
+          } else {
+            grayLetters.add(letter);
+          }
+        }
+
+        // Any letter that appears gray has its max count discovered
+        for (let letter of grayLetters) {
+          const confirmedCount = confirmedInGuess[letter] || 0;
+          letterCounts[letter] = { found: confirmedCount, maxFound: true };
+
+          if (confirmedCount === 0) {
+            excludedLetters.add(letter);
+          }
+        }
+
+        // Update letter counts for confirmed letters
+        for (let [letter, count] of Object.entries(confirmedInGuess)) {
+          if (!letterCounts[letter]) {
+            letterCounts[letter] = { found: 0, maxFound: false };
+          }
+          if (!grayLetters.has(letter)) {
+            // Only update if we didn't see a gray (which would set exact count)
+            letterCounts[letter].found = Math.max(
+              letterCounts[letter].found,
+              count,
+            );
+          }
+        }
+
+        // Process each position
+        for (let i = 0; i < 5; i++) {
+          const letter = guess[i];
+
+          if (result[i] === "correct") {
+            knownPositions[i] = letter;
+            knownLetters.delete(letter);
+          } else if (result[i] === "present") {
+            knownLetters.add(letter);
+            if (!testedPositions[letter]) {
+              testedPositions[letter] = new Set();
+            }
+            testedPositions[letter].add(i);
+          }
+        }
+      }
+
+      function submitGuess() {
+        const guess = guessInputEl.value.toUpperCase();
+
+        if (guess.length !== 5) {
+          errorEl.textContent = "Guess must be 5 letters";
+          return;
+        }
+
+        if (!validGuesses.has(guess)) {
+          errorEl.textContent = "Not a valid word";
+          return;
+        }
+
+        const validationError = validateGuess(guess);
+        if (validationError) {
+          errorEl.textContent = validationError;
+          return;
+        }
+
+        const result = evaluateGuess(guess);
+        guesses.push({ word: guess, result });
+
+        updateGameState(guess, result);
+        updateBoard();
+        updateConstraints();
+
+        if (guess === targetWord) {
+          gameOver = true;
+          gameOverEl.style.display = "block";
+          gameOverEl.innerHTML = `
+                    <p style="font-size: 1.25rem; font-weight: bold;">Game Over!</p>
+                    <p>You found "${targetWord}" in ${guesses.length} guesses</p>
+                    <p style="font-size: 0.875rem; margin-top: 10px;">Remember: more guesses = better score!</p>
+                `;
+          inputAreaEl.style.display = "none";
+        }
+
+        guessInputEl.value = "";
+        errorEl.textContent = "";
+      }
+
+      function updateBoard() {
+        boardEl.innerHTML = "";
+
+        for (let guess of guesses) {
+          const row = document.createElement("div");
+          row.className = "row";
+
+          for (let i = 0; i < 5; i++) {
+            const tile = document.createElement("div");
+            tile.className = `tile ${guess.result[i]}`;
+            tile.textContent = guess.word[i];
+            row.appendChild(tile);
+          }
+
+          boardEl.appendChild(row);
+        }
+      }
+
+      function updateConstraints() {
+        let html = "";
+
+        if (Object.keys(knownPositions).length > 0) {
+          html += '<div class="constraint-item">';
+          html +=
+            '<span class="constraint-label correct">Known positions:</span>';
+          html += Object.entries(knownPositions)
+            .map(
+              ([pos, letter]) => `${letter} at position ${parseInt(pos) + 1}`,
+            )
+            .join(", ");
+          html += "</div>";
+        }
+
+        if (knownLetters.size > 0) {
+          html += '<div class="constraint-item">';
+          html +=
+            '<span class="constraint-label present">Letters in word:</span>';
+          html += Array.from(knownLetters).join(", ");
+          html += "</div>";
+        }
+
+        if (excludedLetters.size > 0) {
+          html += '<div class="constraint-item">';
+          html +=
+            '<span class="constraint-label absent">Excluded letters:</span>';
+          html += Array.from(excludedLetters).join(", ");
+          html += "</div>";
+        }
+
+        constraintsEl.innerHTML =
+          html || '<div style="color: #888;">No constraints yet</div>';
+      }
+
+      // Event listeners
+      submitButtonEl.addEventListener("click", submitGuess);
+      guessInputEl.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") submitGuess();
+      });
+      newGameButtonEl.addEventListener("click", startNewGame);
+      toggleModeButtonEl.addEventListener("click", toggleMode);
+
+      // Initialize
+      fetchWordLists();
+    </script>
+  </body>
+</html>
