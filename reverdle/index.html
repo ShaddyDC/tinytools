@@ -10,7 +10,6 @@
         margin: 0;
         padding: 0;
       }
-
       body {
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -19,29 +18,28 @@
         min-height: 100vh;
         padding: 20px;
       }
-
       .container {
         max-width: 500px;
         margin: 0 auto;
       }
-
       h1 {
         text-align: center;
         font-size: 2.5rem;
         margin-bottom: 10px;
       }
-
       .subtitle {
         text-align: center;
         color: #888;
         margin-bottom: 20px;
       }
-
       .controls {
         text-align: center;
         margin-bottom: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
       }
-
       button {
         background: #3b82f6;
         color: white;
@@ -52,16 +50,19 @@
         font-size: 16px;
         transition: background 0.2s;
       }
-
+      button#giveUp {
+        background: #dc2626;
+      }
+      button#giveUp:hover:not(:disabled) {
+        background: #b91c1c;
+      }
       button:hover:not(:disabled) {
         background: #2563eb;
       }
-
       button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
-
       .game-over {
         background: #065f46;
         padding: 20px;
@@ -69,18 +70,18 @@
         text-align: center;
         margin-bottom: 20px;
       }
-
+      .game-over.failure {
+        background: #991b1b;
+      }
       .board {
         margin-bottom: 30px;
       }
-
       .row {
         display: flex;
         gap: 5px;
         justify-content: center;
         margin-bottom: 5px;
       }
-
       .tile {
         width: 50px;
         height: 50px;
@@ -92,25 +93,20 @@
         border-radius: 4px;
         text-transform: uppercase;
       }
-
       .tile.correct {
         background: #059669;
       }
-
       .tile.present {
         background: #d97706;
       }
-
       .tile.absent {
         background: #4b5563;
       }
-
       .input-area {
         display: flex;
         gap: 10px;
         margin-bottom: 20px;
       }
-
       input {
         flex: 1;
         padding: 12px;
@@ -122,38 +118,35 @@
         text-align: center;
         text-transform: uppercase;
       }
-
       input:focus {
         outline: none;
         border-color: #3b82f6;
       }
-
       .error {
         color: #ef4444;
         text-align: center;
         margin-bottom: 20px;
         min-height: 20px;
       }
-
+      .hint-message {
+        color: #3b82f6;
+      }
       .constraints {
         background: #374151;
         padding: 20px;
         border-radius: 8px;
+        margin-bottom: 20px;
       }
-
       .constraints h3 {
         margin-bottom: 10px;
       }
-
       .constraint-item {
         margin-bottom: 8px;
       }
-
       .constraint-label {
         font-weight: bold;
         margin-right: 8px;
       }
-
       .correct {
         color: #10b981;
       }
@@ -163,12 +156,10 @@
       .absent {
         color: #9ca3af;
       }
-
       .loading {
         text-align: center;
         padding: 40px;
       }
-
       .spinner {
         display: inline-block;
         width: 40px;
@@ -178,7 +169,11 @@
         border-top-color: white;
         animation: spin 1s ease-in-out infinite;
       }
-
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
       .target-word {
         text-align: center;
         margin: 20px 0;
@@ -190,6 +185,55 @@
         font-weight: bold;
         color: #60a5fa;
       }
+      .available-letters-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: center;
+        font-family: "Courier New", Courier, monospace;
+      }
+      .letter-box {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #4b5563;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .instructions {
+        background: #1f2937;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #374151;
+      }
+      .instructions summary {
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 15px 20px;
+        cursor: pointer;
+        outline: none;
+      }
+      .instructions summary::marker {
+        color: #3b82f6;
+      }
+      .instructions-content {
+        padding: 0 20px 15px 20px;
+      }
+      .instructions-content p {
+        margin-bottom: 10px;
+      }
+      .instructions-content ul {
+        margin-left: 20px;
+        margin-bottom: 10px;
+      }
+      .instructions-content li {
+        margin-bottom: 5px;
+      }
+      .instructions-content strong {
+        color: #60a5fa;
+      }
     </style>
   </head>
   <body>
@@ -197,11 +241,42 @@
       <h1>Reverse Wordle</h1>
       <p class="subtitle">Try to take as many guesses as possible!</p>
 
+      <details class="instructions">
+        <summary>How to Play</summary>
+        <div class="instructions-content">
+          <p>
+            The goal is to guess the hidden 5-letter word in
+            <strong>as MANY turns as possible.</strong>
+          </p>
+          <ul>
+            <li>
+              <span class="correct">Green</span>: Correct letter, correct
+              position.
+            </li>
+            <li>
+              <span class="present">Yellow</span>: Correct letter, wrong
+              position.
+            </li>
+            <li><span class="absent">Gray</span>: Letter not in word.</li>
+          </ul>
+          <p>
+            <strong>The Twist:</strong> You MUST follow the clues you've
+            uncovered. The game will enforce these constraints, making it harder
+            to avoid the correct answer.
+          </p>
+          <p>
+            Use the <strong>Hint</strong> button to get a new clue, but it will
+            cost you one point from your final score. Use
+            <strong>Give Up</strong> if you're stuck.
+          </p>
+        </div>
+      </details>
+
       <div class="controls">
         <button id="newGame">New Game</button>
-        <button id="toggleMode" style="margin-left: 10px">
-          Switch to Known Word Mode
-        </button>
+        <button id="toggleMode">Switch to Known Word Mode</button>
+        <button id="hint">Hint (-1 Score)</button>
+        <button id="giveUp">Give Up</button>
       </div>
 
       <div id="loading" class="loading">
@@ -215,11 +290,8 @@
           class="target-word"
           style="display: none"
         ></div>
-
         <div id="gameOver" class="game-over" style="display: none"></div>
-
         <div id="board" class="board"></div>
-
         <div id="inputArea" class="input-area">
           <input
             type="text"
@@ -229,9 +301,11 @@
           />
           <button id="submitGuess">Submit</button>
         </div>
-
         <div id="error" class="error"></div>
-
+        <div class="constraints" id="availableLettersContainer">
+          <h3>Available Letters:</h3>
+          <div id="availableLetters"></div>
+        </div>
         <div class="constraints">
           <h3>Constraints:</h3>
           <div id="constraints"></div>
@@ -240,7 +314,6 @@
     </div>
 
     <script>
-      // Game state
       let targetWord = "";
       let guesses = [];
       let gameOver = false;
@@ -249,6 +322,7 @@
       let excludedLetters = new Set(); // letters not in word
       let testedPositions = {}; // {letter: Set of tested positions}
       let letterCounts = {}; // {letter: {min: n, found: n}} track frequency constraints
+      let hintCount = 0;
       let wordList = [];
       let validGuesses = new Set();
       let knownWordMode = false; // New mode flag
@@ -265,8 +339,10 @@
       const newGameButtonEl = document.getElementById("newGame");
       const toggleModeButtonEl = document.getElementById("toggleMode");
       const targetWordDisplayEl = document.getElementById("targetWordDisplay");
-
       const inputAreaEl = document.getElementById("inputArea");
+      const giveUpButtonEl = document.getElementById("giveUp");
+      const hintButtonEl = document.getElementById("hint");
+      const availableLettersEl = document.getElementById("availableLetters");
 
       // Fetch word lists
       async function fetchWordLists() {
@@ -323,6 +399,7 @@
         targetWord = wordList[Math.floor(Math.random() * wordList.length)];
         guesses = [];
         gameOver = false;
+        hintCount = 0;
         knownPositions = {};
         knownLetters = new Set();
         excludedLetters = new Set();
@@ -332,9 +409,13 @@
         guessInputEl.value = "";
         errorEl.textContent = "";
         gameOverEl.style.display = "none";
+        gameOverEl.classList.remove("failure");
         inputAreaEl.style.display = "flex";
 
         // Show/hide target word based on mode
+        hintButtonEl.disabled = false;
+        giveUpButtonEl.disabled = false;
+
         if (knownWordMode) {
           targetWordDisplayEl.style.display = "block";
           targetWordDisplayEl.textContent = `Target: ${targetWord}`;
@@ -344,6 +425,7 @@
 
         updateBoard();
         updateConstraints();
+        updateAvailableLetters();
       }
 
       function evaluateGuess(guess) {
@@ -393,7 +475,10 @@
 
         // Check excluded letters (only those with no known instances)
         for (let letter of guess) {
-          if (excludedLetters.has(letter) && !letterCounts[letter]) {
+          if (
+            excludedLetters.has(letter) &&
+            (!letterCounts[letter] || letterCounts[letter].found === 0)
+          ) {
             return `Cannot use ${letter} - it's not in the word`;
           }
         }
@@ -413,15 +498,14 @@
 
           const guessPos = guess.indexOf(letter);
           const tested = testedPositions[letter] || new Set();
-
-          if (
-            tested.has(guessPos) &&
-            !(guessPos in knownPositions && knownPositions[guessPos] === letter)
-          ) {
-            return `Must try ${letter} in a new position`;
+          for (let i = 0; i < 5; i++) {
+            if (guess[i] === letter && tested.has(i)) {
+              if (!knownPositions[i] || knownPositions[i] !== letter) {
+                return `Must try ${letter} in a new position`;
+              }
+            }
           }
         }
-
         return null;
       }
 
@@ -454,22 +538,17 @@
 
         // Update letter counts for confirmed letters
         for (let [letter, count] of Object.entries(confirmedInGuess)) {
-          if (!letterCounts[letter]) {
-            letterCounts[letter] = { found: 0, maxFound: false };
-          }
-          if (!grayLetters.has(letter)) {
-            // Only update if we didn't see a gray (which would set exact count)
-            letterCounts[letter].found = Math.max(
-              letterCounts[letter].found,
-              count,
-            );
+          if (!letterCounts[letter] || !letterCounts[letter].maxFound) {
+            letterCounts[letter] = {
+              found: Math.max(letterCounts[letter]?.found || 0, count),
+              maxFound: false,
+            };
           }
         }
 
         // Process each position
         for (let i = 0; i < 5; i++) {
           const letter = guess[i];
-
           if (result[i] === "correct") {
             knownPositions[i] = letter;
             knownLetters.delete(letter);
@@ -483,6 +562,13 @@
         }
       }
 
+      function endTheGame() {
+        gameOver = true;
+        inputAreaEl.style.display = "none";
+        hintButtonEl.disabled = true;
+        giveUpButtonEl.disabled = true;
+      }
+
       function submitGuess() {
         const guess = guessInputEl.value.toUpperCase();
 
@@ -490,17 +576,17 @@
           errorEl.textContent = "Guess must be 5 letters";
           return;
         }
-
         if (!validGuesses.has(guess)) {
           errorEl.textContent = "Not a valid word";
           return;
         }
-
         const validationError = validateGuess(guess);
         if (validationError) {
           errorEl.textContent = validationError;
           return;
         }
+        errorEl.textContent = "";
+        errorEl.classList.remove("hint-message");
 
         const result = evaluateGuess(guess);
         guesses.push({ word: guess, result });
@@ -508,84 +594,155 @@
         updateGameState(guess, result);
         updateBoard();
         updateConstraints();
+        updateAvailableLetters();
 
         if (guess === targetWord) {
-          gameOver = true;
           gameOverEl.style.display = "block";
+          const totalScore = guesses.length - hintCount;
           gameOverEl.innerHTML = `
                     <p style="font-size: 1.25rem; font-weight: bold;">Game Over!</p>
-                    <p>You found "${targetWord}" in ${guesses.length} guesses</p>
-                    <p style="font-size: 0.875rem; margin-top: 10px;">Remember: more guesses = better score!</p>
+                    <p>You found "${targetWord}" in ${guesses.length} guesses and used ${hintCount} hints.</p>
+                    <p style="font-size: 1.5rem; margin-top: 10px;">Total Score: ${totalScore}</p>
+                    <p style="font-size: 0.875rem; margin-top: 10px;">Remember: more turns = better score!</p>
                 `;
-          inputAreaEl.style.display = "none";
+          endTheGame();
         }
 
         guessInputEl.value = "";
-        errorEl.textContent = "";
       }
 
       function updateBoard() {
         boardEl.innerHTML = "";
-
         for (let guess of guesses) {
           const row = document.createElement("div");
           row.className = "row";
-
           for (let i = 0; i < 5; i++) {
             const tile = document.createElement("div");
             tile.className = `tile ${guess.result[i]}`;
             tile.textContent = guess.word[i];
             row.appendChild(tile);
           }
-
           boardEl.appendChild(row);
         }
       }
 
       function updateConstraints() {
         let html = "";
-
         if (Object.keys(knownPositions).length > 0) {
           html += '<div class="constraint-item">';
           html +=
             '<span class="constraint-label correct">Known positions:</span>';
           html += Object.entries(knownPositions)
-            .map(
-              ([pos, letter]) => `${letter} at position ${parseInt(pos) + 1}`,
-            )
+            .sort((a, b) => a[0] - b[0])
+            .map(([pos, letter]) => `${letter} at ${parseInt(pos) + 1}`)
             .join(", ");
           html += "</div>";
         }
-
         if (knownLetters.size > 0) {
           html += '<div class="constraint-item">';
           html +=
             '<span class="constraint-label present">Letters in word:</span>';
-          html += Array.from(knownLetters).join(", ");
+          html += Array.from(knownLetters).sort().join(", ");
           html += "</div>";
         }
-
-        if (excludedLetters.size > 0) {
+        const displayedExcluded = Array.from(excludedLetters).filter(
+          (l) =>
+            !knownLetters.has(l) && !Object.values(knownPositions).includes(l),
+        );
+        if (displayedExcluded.length > 0) {
           html += '<div class="constraint-item">';
           html +=
             '<span class="constraint-label absent">Excluded letters:</span>';
-          html += Array.from(excludedLetters).join(", ");
+          html += displayedExcluded.sort().join(", ");
           html += "</div>";
         }
-
         constraintsEl.innerHTML =
           html || '<div style="color: #888;">No constraints yet</div>';
       }
 
-      // Event listeners
+      function updateAvailableLetters() {
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        availableLettersEl.innerHTML = "";
+        const grid = document.createElement("div");
+        grid.className = "available-letters-grid";
+
+        alphabet.forEach((letter) => {
+          if (!excludedLetters.has(letter)) {
+            const letterBox = document.createElement("div");
+            letterBox.className = "letter-box";
+            letterBox.textContent = letter;
+            grid.appendChild(letterBox);
+          }
+        });
+        availableLettersEl.appendChild(grid);
+      }
+
+      function giveUp() {
+        gameOverEl.style.display = "block";
+        gameOverEl.classList.add("failure");
+        gameOverEl.innerHTML = `
+                <p style="font-size: 1.25rem; font-weight: bold;">Game Over</p>
+                <p>The word was: <strong>${targetWord}</strong></p>
+            `;
+        endTheGame();
+      }
+
+      function provideHint() {
+        if (gameOver) return;
+        errorEl.textContent = "";
+
+        const targetLetters = new Set(targetWord.split(""));
+        const allKnownLetters = new Set([
+          ...knownLetters,
+          ...Object.values(knownPositions),
+        ]);
+        const unknownTargetLetters = [...targetLetters].filter(
+          (l) => !allKnownLetters.has(l),
+        );
+
+        if (unknownTargetLetters.length > 0) {
+          const hintLetter = unknownTargetLetters[0];
+          knownLetters.add(hintLetter);
+          hintCount++;
+          errorEl.textContent = `Hint: The letter "${hintLetter}" is in the word. Good luck!`;
+          errorEl.classList.add("hint-message");
+        } else {
+          let hintGiven = false;
+          const yellowLetters = Array.from(knownLetters);
+          for (const letter of yellowLetters) {
+            for (let i = 0; i < 5; i++) {
+              if (targetWord[i] === letter && !knownPositions[i]) {
+                knownPositions[i] = letter;
+                knownLetters.delete(letter);
+                hintCount++;
+                errorEl.textContent = `Hint: The letter "${letter}" is in position ${i + 1}.`;
+                errorEl.classList.add("hint-message");
+                hintGiven = true;
+                break;
+              }
+            }
+            if (hintGiven) break;
+          }
+          if (!hintGiven) {
+            errorEl.textContent = "No more hints available!";
+            errorEl.classList.remove("hint-message");
+            hintButtonEl.disabled = true;
+          }
+        }
+
+        updateConstraints();
+        updateAvailableLetters();
+      }
+
       submitButtonEl.addEventListener("click", submitGuess);
       guessInputEl.addEventListener("keypress", (e) => {
         if (e.key === "Enter") submitGuess();
       });
       newGameButtonEl.addEventListener("click", startNewGame);
       toggleModeButtonEl.addEventListener("click", toggleMode);
+      giveUpButtonEl.addEventListener("click", giveUp);
+      hintButtonEl.addEventListener("click", provideHint);
 
-      // Initialize
       fetchWordLists();
     </script>
   </body>
