@@ -554,6 +554,13 @@
               testedPositions[letter] = new Set();
             }
             testedPositions[letter].add(i);
+          } else {
+            // result[i] is 'absent'
+            // If a letter is marked gray, we now know it can't be in this spot.
+            if (!testedPositions[letter]) {
+              testedPositions[letter] = new Set();
+            }
+            testedPositions[letter].add(i);
           }
         }
       }
