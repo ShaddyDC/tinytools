@@ -348,9 +348,7 @@
       async function fetchWordLists() {
         try {
           // Fetch answer list
-          const answersResponse = await fetch(
-            "https://raw.githubusercontent.com/tabatkins/wordle-list/main/words",
-          );
+          const answersResponse = await fetch("./wordle-La.txt");
           const answersText = await answersResponse.text();
           const answerWords = answersText
             .split("\n")
@@ -358,9 +356,7 @@
             .map((w) => w.toUpperCase());
 
           // Fetch valid guesses
-          const guessesResponse = await fetch(
-            "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt",
-          );
+          const guessesResponse = await fetch("./wordle-Ta.txt");
           const guessesText = await guessesResponse.text();
           const allWords = guessesText
             .split("\n")
@@ -370,7 +366,7 @@
 
           wordList =
             answerWords.length > 0 ? answerWords : ["CRANE", "SLATE", "CRISP"];
-          validGuesses = new Set([...answerWords, ...allWords.slice(0, 5000)]);
+          validGuesses = new Set([...answerWords, ...allWords]);
 
           if (wordList.length > 0) {
             startNewGame();
