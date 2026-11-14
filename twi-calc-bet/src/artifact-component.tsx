@@ -100,8 +100,8 @@ const TwitchPredictionCalculator = () => {
         <div className="space-y-4">
           {/* Blue Points Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Blue Team Points</label>
-            <div className="grid grid-cols-[1fr,auto] gap-4 items-center">
+            <label className="block text-sm font-medium">Blue Team Points</label>
+            <div className="grid grid-cols-[1fr_auto] gap-4 items-center">
               <div className="relative pt-1">
                 <Slider
                   value={[bluePoints]}
@@ -122,8 +122,8 @@ const TwitchPredictionCalculator = () => {
 
           {/* Red Points Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Red Team Points</label>
-            <div className="grid grid-cols-[1fr,auto] gap-4 items-center">
+            <label className="block text-sm font-medium">Red Team Points</label>
+            <div className="grid grid-cols-[1fr_auto] gap-4 items-center">
               <div className="relative pt-1">
                 <Slider
                   value={[redPoints]}
@@ -144,7 +144,7 @@ const TwitchPredictionCalculator = () => {
 
           {/* Probability Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Blue Win Probability: {probability}%</label>
+            <label className="block text-sm font-medium">Blue Win Probability: {probability}%</label>
             <Slider
               value={[probability]}
               onValueChange={(value) => setProbability(value[0])}
@@ -156,8 +156,8 @@ const TwitchPredictionCalculator = () => {
 
           {/* Bet Amount Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Your Bet Amount</label>
-            <div className="grid grid-cols-[1fr,auto] gap-4 items-center">
+            <label className="block text-sm font-medium">Your Bet Amount</label>
+            <div className="grid grid-cols-[1fr_auto] gap-4 items-center">
               <div className="relative pt-1">
                 <Slider
                   value={[betAmount]}

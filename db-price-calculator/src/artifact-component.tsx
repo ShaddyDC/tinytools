@@ -242,7 +242,7 @@ const PriceCalculator = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div className="space-y-2">
-                <Label>Age Group</Label>
+                <Label className="block">Age Group</Label>
                 <Select value={selectedGroup} onValueChange={setSelectedGroup}>
                   <SelectTrigger>
                     <SelectValue />
@@ -258,7 +258,7 @@ const PriceCalculator = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Number of Trips</Label>
+                <Label className="block">Number of Trips</Label>
                 <Input
                   type="number"
                   min="1"
